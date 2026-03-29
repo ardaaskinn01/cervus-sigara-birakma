@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115613370863",
+    "project_id": "sigara-80178",
+    "storage_bucket": "sigara-80178.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115613370863:android:daf8a210642360768b4e1a",
+        "android_client_info": {
+          "package_name": "com.cervus.sigara.sigara"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCK7cATJmgkYGU-xlMlJXHhRFL0QO8-9No"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
