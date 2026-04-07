@@ -19,6 +19,17 @@ class _HealthViewState extends ConsumerState<HealthView> {
     final db = ref.watch(databaseProvider);
     final yearsSmoking = db.localUserData?['yearsSmoking'] ?? 0;
 
+    // Genel Arınma Oranını Hesapla (Tüm hedeflerin ortalama ilerlemesi)
+    double totalProgress = 0;
+    for (var goal in healthGoals) {
+      final adjusted = goal.getAdjustedDuration(yearsSmoking);
+      double p = state.timeElapsed.inSeconds / adjusted.inSeconds;
+      if (p > 1.0) p = 1.0;
+      totalProgress += p;
+    }
+    final double overallPurity = totalProgress / healthGoals.length;
+    final int purityPercentage = (overallPurity * 100).toInt();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F9F4),
       appBar: AppBar(
@@ -28,22 +39,168 @@ class _HealthViewState extends ConsumerState<HealthView> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: ListView.builder(
+        child: ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 120),
-          itemCount: healthGoals.length,
-          itemBuilder: (context, index) {
-            return FadeInSlideFast(
-              delay: Duration(milliseconds: 100 + (index * 100)),
-              child: HealthProgressWidget(
-                timeElapsed: state.timeElapsed,
-                goal: healthGoals[index],
-                yearsSmoking: yearsSmoking,
+          children: [
+            // Canlı Vücut Arınma Göstergesi
+            FadeInSlideFast(
+              delay: const Duration(milliseconds: 100),
+              child: _buildMasterPurityCard(purityPercentage),
+            ),
+            const SizedBox(height: 32),
+            
+            // "Ayrıntılı İyileşme Süreci" Başlığı
+            FadeInSlideFast(
+              delay: const Duration(milliseconds: 200),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 16),
+                child: Text(
+                  'Aşama Aşama Yenilenme',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.grey.shade800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
               ),
-            );
-          },
+            ),
+
+            // İyileşme Çubukları
+            ...List.generate(healthGoals.length, (index) {
+              return FadeInSlideFast(
+                delay: Duration(milliseconds: 300 + (index * 100)),
+                child: HealthProgressWidget(
+                  timeElapsed: state.timeElapsed,
+                  goal: healthGoals[index],
+                  yearsSmoking: yearsSmoking,
+                ),
+              );
+            }),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMasterPurityCard(int purityPercentage) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.2),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: Column(
+        children: [
+          // Nefes Alan / Kalp Atan Animasyonlu İkon
+          const BreathingHeartIcon(),
+          const SizedBox(height: 24),
+          const Text(
+            'Genel Vücut Arınması',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32)),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '%$purityPercentage',
+                style: const TextStyle(
+                  fontSize: 64,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1B5E20),
+                  letterSpacing: -2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Her saniye bedenindeki hücreler mucizevi bir şekilde kendini onarıyor. Derin bir nefes al ve bu tazeliği hisset.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1B5E20).withOpacity(0.8),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Büyüyüp Küçülen (Nefes Alan) Kalp/Doğa İkonu
+class BreathingHeartIcon extends StatefulWidget {
+  const BreathingHeartIcon({super.key});
+
+  @override
+  State<BreathingHeartIcon> createState() => _BreathingHeartIconState();
+}
+
+class _BreathingHeartIconState extends State<BreathingHeartIcon> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+       vsync: this,
+       duration: const Duration(seconds: 2), // İdeal insan nefes hızı (Genişleme)
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.15).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4CAF50).withOpacity(0.4),
+                  blurRadius: 20 * _scaleAnimation.value,
+                  spreadRadius: 2 * _scaleAnimation.value,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.favorite_rounded, size: 48, color: Color(0xFF4CAF50)),
+          ),
+        );
+      },
     );
   }
 }

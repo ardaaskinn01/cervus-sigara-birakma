@@ -92,7 +92,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   padding: const EdgeInsets.all(32.0),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF4CAF50), Color(0xFF1B5E20)],
+                      colors: [Color(0xFF47D548), Color(0xFF1B5E20)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -142,7 +142,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 ),
               ),
 // Removed Health Progress Section
-
+              const SizedBox(height: 44),
               // Sigara İçtim Butonu
               FadeInSlide(
                 delay: const Duration(milliseconds: 1400),

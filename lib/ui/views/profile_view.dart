@@ -197,6 +197,28 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                     Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      onTap: () async {
+                        await NotificationService().showImmediateNotification();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Test bildirimi gönderildi! 🔔'),
+                            backgroundColor: Color(0xFF4CAF50),
+                            behavior: SnackBarBehavior.floating,
+                          ));
+                        }
+                      },
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.send_rounded, color: Color(0xFF4CAF50)),
+                      ),
+                      title: const Text('Test Bildirimi Gönder', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      subtitle: Text('Bildirimlerin çalışıp çalışmadığını test et.', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                    ),
+                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: const Text('Destekleriniz için teşekkürler! ❤️', style: TextStyle(fontWeight: FontWeight.bold)),

@@ -82,6 +82,12 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
       final db = ref.read(databaseProvider);
       await db.init();
 
+      // Kullanıcı kayıtlıysa ve bildirimler açıksa, bildirimleri her açılışta tazeleyelim
+      if (db.isRegistered && db.notificationsEnabled) {
+        debugPrint('🔔 Bildirimler planlanıyor...');
+        await NotificationService().schedulePeriodicNotifications();
+      }
+
       debugPrint('💰 AdMob başlatılıyor...');
       // initialize() zaten güvenli, ama beklemeden devam ediyoruz
       MobileAds.instance.initialize();
