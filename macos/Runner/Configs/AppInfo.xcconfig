@@ -8,7 +8,7 @@
 PRODUCT_NAME = sigara
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.cervus.sigara.sigara
+PRODUCT_BUNDLE_IDENTIFIER = com.cervus.sigara
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.cervus.sigara. All rights reserved.

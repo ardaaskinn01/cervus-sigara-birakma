@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:115613370863:android:daf8a210642360768b4e1a",
+        "mobilesdk_app_id": "1:115613370863:android:eb00386a0c40b5578b4e1a",
         "android_client_info": {
-          "package_name": "com.cervus.sigara.sigara"
+          "package_name": "com.cervus.sigara"
         }
       },
       "oauth_client": [],

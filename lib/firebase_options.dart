@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCK7cATJmgkYGU-xlMlJXHhRFL0QO8-9No',
-    appId: '1:115613370863:android:daf8a210642360768b4e1a',
+    appId: '1:115613370863:android:eb00386a0c40b5578b4e1a',
     messagingSenderId: '115613370863',
     projectId: 'sigara-80178',
     storageBucket: 'sigara-80178.firebasestorage.app',
@@ -60,20 +60,20 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC-Ds-l0UV4BE3pinjgbB5kia3oCvuOXsg',
-    appId: '1:115613370863:ios:81e720e8b4eaaa998b4e1a',
+    appId: '1:115613370863:ios:d19f32ec52aa00678b4e1a',
     messagingSenderId: '115613370863',
     projectId: 'sigara-80178',
     storageBucket: 'sigara-80178.firebasestorage.app',
-    iosBundleId: 'com.cervus.sigara.sigara',
+    iosBundleId: 'com.cervus.sigara',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyC-Ds-l0UV4BE3pinjgbB5kia3oCvuOXsg',
-    appId: '1:115613370863:ios:81e720e8b4eaaa998b4e1a',
+    appId: '1:115613370863:ios:d19f32ec52aa00678b4e1a',
     messagingSenderId: '115613370863',
     projectId: 'sigara-80178',
     storageBucket: 'sigara-80178.firebasestorage.app',
-    iosBundleId: 'com.cervus.sigara.sigara',
+    iosBundleId: 'com.cervus.sigara',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

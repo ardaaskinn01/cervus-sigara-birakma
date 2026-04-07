@@ -1,4 +1,4 @@
-package com.cervus.sigara.sigara
+package com.cervus.sigara
 
 import io.flutter.embedding.android.FlutterActivity
 
