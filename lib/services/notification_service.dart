@@ -19,19 +19,16 @@ class NotificationService {
     // 1. Timezone verilerini yükle
     tz.initializeTimeZones();
     
-    // 2. Telefonun Yerel Saat Dilimini Tespit Et (Paketsiz ve Güvenli Yol)
+    // 2. Telefonun Yerel Saat Dilimini Ayarla
     try {
-      // Cihazın şu anki yerel saati ile UTC arasındaki farkı saniye cinsinden alıyoruz
-      final int offsetInSeconds = DateTime.now().timeZoneOffset.inSeconds;
-      
-      // Bu farkı kullanarak anonim bir yerel lokasyon oluşturuyoruz
-      // tz.Location(name, transitionAt, transitionZone, zones) yapısı karmaşık olduğu için
-      // en pratik yol: tz.local'i cihazın offset'ine göre kaydırılmış bir lokasyona eşitlemek.
-      // tz.setLocalLocation(tz.getLocation(...)) yerine doğrudan offset kullanarak saati bulacağız.
-      // Not: Çoğu modern cihazda tz.local zaten otomatik doğru gelmeye çalışır ama biz 
-      // planlama sırasında DateTime.now() bazlı dinamik planlama yapacağız.
+      final String timeZoneName = DateTime.now().timeZoneName;
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
     } catch (e) {
-      // Hata durumunda UTC devam et
+      final int offsetInSeconds = DateTime.now().timeZoneOffset.inSeconds;
+      final location = tz.Location('Local', [0], [0], [
+        tz.TimeZone(offsetInSeconds, isDst: false, abbreviation: 'LOC')
+      ]);
+      tz.setLocalLocation(location);
     }
 
     // 3. Android İkon Ayarı
@@ -83,8 +80,11 @@ class NotificationService {
     );
   }
 
-  /// Zamanlanmış bildirimler (Telefonun Yerel Saatine Göre)
+  /// Günlük periyodik bildirimleri ayarla (Öğlen 12 ve Akşam 20:00)
   Future<void> schedulePeriodicNotifications() async {
+    // Önce eski tüm bildirimleri temizleyelim (çakışma olmaması için)
+    await cancelAllNotifications();
+
     const androidDetails = AndroidNotificationDetails(
       'daily_motivation_channel',
       'Günlük Motivasyon',
@@ -95,30 +95,40 @@ class NotificationService {
     const iosDetails = DarwinNotificationDetails();
     const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-    // KRİTİK DÜZELTME: tz.local yerine DateTime.now() üzerinden 
-    // mutlak bir TZDateTime oluşturuyoruz. Bu sayede cihaz hangi saatteyse
-    // o saati referans alır, İstanbul mu Londra mı diye bakmaz.
-    final DateTime now = DateTime.now();
-    
-    // 1. Bildirim (1 dak sonra)
+    // 1. Bildirim: Öğlen 12:00
     await _notificationsPlugin.zonedSchedule(
-      1,
-      'Harika Gidiyorsun! 💪',
-      'Vücudun daha da temizlendi. Devam et!',
-      tz.TZDateTime.from(now.add(const Duration(minutes: 1)), tz.local),
+      1200,
+      'Günün Yarısı Tamam! 💪',
+      'Bugün hiç sigara içmedin. Harika ilerliyorsun!',
+      _nextInstanceOfTime(12, 0),
       details,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time, // Her gün aynı saatte tekrarla
     );
 
-    // 2. Bildirim (2 dak sonra)
+    // 2. Bildirim: Akşam 20:00
     await _notificationsPlugin.zonedSchedule(
-      2,
-      'Akciğerlerin Rahatlıyor 🫁',
-      'Her nefes daha temiz. Kararından vazgeçme!',
-      tz.TZDateTime.from(now.add(const Duration(minutes: 2)), tz.local),
+      2000,
+      'İyi Akşamlar! 🌿',
+      'Günü tertemiz bitirmek üzeresin. Akciğerlerin sana teşekkür ediyor.',
+      _nextInstanceOfTime(20, 0),
       details,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time, // Her gün aynı saatte tekrarla
     );
+  }
+
+  /// Belirtilen saat ve dakika için bir sonraki zaman dilimini hesapla
+  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    
+    // Eğer saat geçtiyse bir sonraki güne ayarla
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    return scheduledDate;
   }
 
   Future<void> cancelAllNotifications() async {
