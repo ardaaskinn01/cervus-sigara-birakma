@@ -343,7 +343,7 @@ class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStat
   }
 }
 
-/// Karbon Ayak İzi Widget'ı
+/// Modern & Şık Karbon Ayak İzi Widget'ı
 class CarbonFootprintCard extends StatelessWidget {
   final double savedCO2;
   final int avoidedCigarettes;
@@ -356,111 +356,211 @@ class CarbonFootprintCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sadece gr -> kg gösterimi için
     final String co2Text = savedCO2 > 1000 
       ? '${(savedCO2 / 1000).toStringAsFixed(2)} kg' 
       : '${savedCO2.toStringAsFixed(0)} gr';
 
-    // Ağaç büyüme animasyonu/görseli seviyesi (Maksimum 4 seviye)
-    // Örnek: Her 50 sigarada bir seviye atlar
     int treeLevel = (avoidedCigarettes / 50).floor().clamp(1, 4);
 
     IconData treeIcon;
-    double iconSize = 35.0 + (treeLevel * 10);
-    Color treeColor;
+    Color primaryColor;
+    Color secondaryColor;
+    String statusText;
 
     switch (treeLevel) {
       case 1:
-        treeIcon = Icons.eco_outlined; // Tohum / Yaprak
-        treeColor = Colors.lightGreen;
+        treeIcon = Icons.eco_outlined;
+        primaryColor = const Color(0xFF81C784);
+        secondaryColor = const Color(0xFFC8E6C9);
+        statusText = "Doğa Tohumları Atıldı";
         break;
       case 2:
-        treeIcon = Icons.eco; // Fidan
-        treeColor = Colors.green;
+        treeIcon = Icons.eco;
+        primaryColor = const Color(0xFF66BB6A);
+        secondaryColor = const Color(0xFFA5D6A7);
+        statusText = "Fidanın Büyüyor";
         break;
       case 3:
-        treeIcon = Icons.park_outlined; // Genç Ağaç
-        treeColor = Colors.green.shade700;
+        treeIcon = Icons.park_outlined;
+        primaryColor = const Color(0xFF43A047);
+        secondaryColor = const Color(0xFF81C784);
+        statusText = "Genç Bir Ağaç Oldu";
         break;
       case 4:
       default:
-        treeIcon = Icons.park; // Tam Ağaç
-        treeColor = Colors.green.shade900;
+        treeIcon = Icons.park;
+        primaryColor = const Color(0xFF1B5E20);
+        secondaryColor = const Color(0xFF4CAF50);
+        statusText = "Koca Bir Çınar Yolunda";
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(32),
+        gradient: LinearGradient(
+          colors: [Colors.white, secondaryColor.withOpacity(0.3)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
+          BoxShadow(
+            color: primaryColor.withOpacity(0.12),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
         ],
+        border: Border.all(color: Colors.white, width: 2),
       ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-               Container(
-                 padding: const EdgeInsets.all(12),
-                 decoration: BoxDecoration(
-                   color: treeColor.withOpacity(0.1),
-                   shape: BoxShape.circle,
-                 ),
-                 child: TweenAnimationBuilder(
-                   tween: Tween<double>(begin: 0, end: 1),
-                   duration: const Duration(seconds: 1),
-                   builder: (context, val, child) {
-                     return Transform.scale(
-                       scale: val,
-                       child: Icon(treeIcon, size: iconSize * val, color: treeColor),
-                     );
-                   },
-                 ),
-               ),
-               const SizedBox(width: 16),
-               Expanded(
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     const Text(
-                       'Doğaya Katkın',
-                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                     ),
-                     const SizedBox(height: 4),
-                     Text(
-                       'İçilmeyen $avoidedCigarettes sigara',
-                       style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                     ),
-                   ],
-                 ),
-               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            decoration: BoxDecoration(
-              color: treeColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Kurtarılan CO2',
-                  style: TextStyle(fontWeight: FontWeight.w600, color: treeColor),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: Stack(
+          children: [
+            // Arka Plan Dekoratif Halka
+            Positioned(
+              right: -30,
+              top: -30,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primaryColor.withOpacity(0.05),
                 ),
-                Text(
-                  co2Text,
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: treeColor),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      // İkon Konteynırı
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryColor.withOpacity(0.2),
+                              blurRadius: 15,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(seconds: 1),
+                          builder: (context, val, child) {
+                            return Transform.rotate(
+                              angle: (1 - val) * 0.5,
+                              child: Icon(treeIcon, size: 32, color: primaryColor),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Doğaya Katkın',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: primaryColor.withAlpha(200),
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            Text(
+                              statusText,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Değer Kartı
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: primaryColor.withOpacity(0.1)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'KURTARILAN CO2',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              co2Text.split(' ')[0],
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.w900,
+                                color: primaryColor,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: Text(
+                                co2Text.split(' ')[1],
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: primaryColor.withOpacity(0.6),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Alt Bilgi
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle_rounded, size: 14, color: primaryColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        'İçilmeyen $avoidedCigarettes sigara sayesinde',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
