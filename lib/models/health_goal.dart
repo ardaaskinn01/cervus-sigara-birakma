@@ -62,4 +62,19 @@ const List<HealthGoal> healthGoals = [
     description: 'Koroner kalp hastalığı riski, sigara içen birine göre yarı yarıya düşer.',
     baseDuration: Duration(days: 365),
   ),
+  HealthGoal(
+    title: 'Felç Riski Sıfırlanır',
+    description: '5-15 yıl içinde felç geçirme riski, hiç sigara içmemiş birinin seviyesine iner.',
+    baseDuration: Duration(days: 1825), // 5 Yıl
+  ),
+  HealthGoal(
+    title: 'Akciğer Kanseri Riski',
+    description: 'Akciğer kanserinden ölme riski, hala içen birine göre yarı yarıya azalır.',
+    baseDuration: Duration(days: 3650), // 10 Yıl
+  ),
+  HealthGoal(
+    title: 'Tam İyileşme',
+    description: 'Kalp hastalığı riski, artık hiç içmemiş birinin riskiyle aynı seviyeye gelir.',
+    baseDuration: Duration(days: 5475), // 15 Yıl
+  ),
 ];

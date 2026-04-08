@@ -18,12 +18,16 @@ class HealthProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final adjustedTarget = goal.getAdjustedDuration(yearsSmoking);
     
-    double progress = timeElapsed.inSeconds / adjustedTarget.inSeconds;
-    if (progress > 1.0) progress = 1.0;
-    if (progress < 0.0) progress = 0.0;
+    // Linear progress (0.0 to 1.0)
+    double rawProgress = timeElapsed.inSeconds / adjustedTarget.inSeconds;
+    if (rawProgress > 1.0) rawProgress = 1.0;
+    if (rawProgress < 0.0) rawProgress = 0.0;
     
-    final int percentage = (progress * 100).toInt();
-    final bool isCompleted = progress >= 1.0;
+    // Quadratic Progress: t^2 modeli ile daha gerçekçi hız
+    // Bu sayede %100'e ulaşmak aynı vakti alır ama ara değerler daha yavaş artar.
+    double displayProgress = rawProgress * rawProgress;
+    final int percentage = (displayProgress * 100).toInt();
+    final bool isCompleted = rawProgress >= 1.0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -99,7 +103,7 @@ class HealthProgressWidget extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
-                    value: progress,
+                    value: displayProgress,
                     minHeight: 10,
                     backgroundColor: Colors.grey.shade100,
                     valueColor: AlwaysStoppedAnimation<Color>(

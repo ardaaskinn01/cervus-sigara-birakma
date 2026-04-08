@@ -19,15 +19,19 @@ class _HealthViewState extends ConsumerState<HealthView> {
     final db = ref.watch(databaseProvider);
     final yearsSmoking = db.localUserData?['yearsSmoking'] ?? 0;
 
-    // Genel Arınma Oranını Hesapla (Tüm hedeflerin ortalama ilerlemesi)
-    double totalProgress = 0;
+    // Genel Arınma Oranını Hesapla (Daha Gerçekçi Karesel Model)
+    double totalProgressSum = 0;
     for (var goal in healthGoals) {
       final adjusted = goal.getAdjustedDuration(yearsSmoking);
       double p = state.timeElapsed.inSeconds / adjusted.inSeconds;
       if (p > 1.0) p = 1.0;
-      totalProgress += p;
+      
+      // Karesel İlerleme: p^2 sayesinde ilerleme başında yavaş, sonuna doğru dolgun görünür.
+      // Bu bilimsel olarak "toplam hasarın azalma hızı"na daha yakındır.
+      totalProgressSum += (p * p);
     }
-    final double overallPurity = totalProgress / healthGoals.length;
+    
+    final double overallPurity = totalProgressSum / healthGoals.length;
     final int purityPercentage = (overallPurity * 100).toInt();
 
     return Scaffold(
