@@ -143,6 +143,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           hintStyle: TextStyle(fontSize: 42, fontWeight: FontWeight.w200, color: Colors.grey.shade300),
                           border: InputBorder.none,
                         ),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _nextPage(),
                         validator: (v) => v == null || v.trim().isEmpty ? 'Boş bırakılamaz' : null,
                       ),
                     ),
@@ -159,6 +161,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           hintStyle: TextStyle(fontSize: 56, fontWeight: FontWeight.w200, color: Colors.grey.shade300),
                           border: InputBorder.none,
                         ),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _nextPage(),
                         validator: (v) => v == null || v.isEmpty ? 'Boş bırakılamaz' : null,
                       ),
                     ),
@@ -175,6 +179,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           hintStyle: TextStyle(fontSize: 56, fontWeight: FontWeight.w200, color: Colors.grey.shade300),
                           border: InputBorder.none,
                         ),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _nextPage(),
                         validator: (v) => v == null || v.isEmpty ? 'Boş bırakılamaz' : null,
                       ),
                     ),
@@ -191,6 +197,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           hintStyle: TextStyle(fontSize: 56, fontWeight: FontWeight.w200, color: Colors.grey.shade300),
                           border: InputBorder.none,
                         ),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _nextPage(),
                         validator: (v) => v == null || v.isEmpty ? 'Boş bırakılamaz' : null,
                       ),
                     ),
@@ -206,6 +214,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                         ),
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _nextPage(),
                         validator: (v) => v == null || v.isEmpty ? 'Boş bırakılamaz' : null,
                       ),
                     ),
@@ -223,6 +233,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                           hintText: '0',
                           hintStyle: TextStyle(fontWeight: FontWeight.w200, color: Colors.black12),
                         ),
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _nextPage(),
                       ),
                     ),
                   ],
@@ -281,48 +293,57 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
   }
 
   Widget _buildStepCard({required IconData icon, required String title, required String subtitle, required Widget input}) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 32.0),
-        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 40, spreadRadius: 0, offset: const Offset(0, 20)),
-            const BoxShadow(color: Colors.white, blurRadius: 10, offset: Offset(-5, -5)),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F9F4),
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32.0),
+                padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 40, spreadRadius: 0, offset: const Offset(0, 20)),
+                    const BoxShadow(color: Colors.white, blurRadius: 10, offset: Offset(-5, -5)),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4F9F4),
+                        shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+                      ),
+                      child: Icon(icon, size: 48, color: const Color(0xFF4CAF50)),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1B5E20), letterSpacing: -0.5),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 15, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    input,
+                  ],
+                ),
               ),
-              child: Icon(icon, size: 48, color: const Color(0xFF4CAF50)),
             ),
-            const SizedBox(height: 32),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1B5E20), letterSpacing: -0.5),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              subtitle,
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            // The input field styling will be huge, thin, centralized text.
-            input,
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
