@@ -4,16 +4,22 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DatabaseService {
+  static final DatabaseService _instance = DatabaseService._internal();
+  factory DatabaseService() => _instance;
+  DatabaseService._internal();
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late Box _userBox;
+  bool _initialized = false;
 
   Future<void> init() async {
+    if (_initialized) return;
     _userBox = await Hive.openBox('userBox');
+    _initialized = true;
   }
 
   /// Finds a unique ID by appending a number if the base name already exists.
   Future<String> _getUniqueFirebaseId(String baseName) async {
-    // Türkçe karakterleri vs düzenleyerek ID'ye uygun hale getirebiliriz.
     String currentName = baseName.trim().replaceAll(' ', '_').toLowerCase();
     int suffix = 2; 
     bool isUnique = false;
@@ -40,15 +46,14 @@ class DatabaseService {
     required int dailyCigarettes,
     required double packPrice,
     required int daysSinceQuitting,
+    String currency = 'TRY',
   }) async {
     try {
-      // 1. Generate unique Firebase ID
       final String uniqueId = await _getUniqueFirebaseId(name);
 
       final now = DateTime.now();
       final registrationDate = now.subtract(Duration(days: daysSinceQuitting));
 
-      // 2. Prepare user data map
       final Map<String, dynamic> userData = {
         'id': uniqueId,
         'originalName': name,
@@ -56,14 +61,13 @@ class DatabaseService {
         'yearsSmoking': yearsSmoking,
         'dailyCigarettes': dailyCigarettes,
         'packPrice': packPrice,
+        'currency': currency,
         'registrationDate': Timestamp.fromDate(registrationDate),
         'isPrivacyAccepted': true,
       };
 
-      // 3. Save to Firebase
       await _firestore.collection('users').doc(uniqueId).set(userData);
 
-      // 4. Save to Hive Locally
       final localData = Map<String, dynamic>.from(userData);
       localData['registrationDate'] = registrationDate.toIso8601String(); 
       
@@ -88,12 +92,10 @@ class DatabaseService {
       final now = DateTime.now();
       final nowStr = now.toIso8601String();
 
-      // 1. Update Firestore
       await _firestore.collection('users').doc(uniqueId).update({
         'registrationDate': FieldValue.serverTimestamp(),
       });
 
-      // 2. Update Hive
       final newLocalData = Map<String, dynamic>.from(currentLocalData);
       newLocalData['registrationDate'] = nowStr;
       await _userBox.put('userData', newLocalData);
@@ -115,9 +117,20 @@ class DatabaseService {
   bool get notificationsEnabled => _userBox.get('notificationsEnabled', defaultValue: true);
   Future<void> setNotificationsEnabled(bool value) async => _userBox.put('notificationsEnabled', value);
 
-  // Localization
+  // Localization & Currency
   String? get localeCode => _userBox.get('localeCode');
   Future<void> setLocale(String code) async => _userBox.put('localeCode', code);
+
+  String get currency => localUserData?['currency'] ?? 'TRY';
+  
+  String get currencySymbol {
+    switch (currency) {
+      case 'USD': return '\$';
+      case 'EUR': return '€';
+      case 'TRY':
+      default: return '₺';
+    }
+  }
 
   /// Güncellemeleri Kaydet (Profil Ekranı İçin)
   Future<void> updateProfile({
@@ -126,6 +139,7 @@ class DatabaseService {
     int? yearsSmoking,
     int? dailyCigarettes,
     double? packPrice,
+    String? currency,
   }) async {
     final String? uniqueId = currentFirebaseId;
     final Map<dynamic, dynamic>? currentLocalData = localUserData;
@@ -138,31 +152,25 @@ class DatabaseService {
     if (yearsSmoking != null) updates['yearsSmoking'] = yearsSmoking;
     if (dailyCigarettes != null) updates['dailyCigarettes'] = dailyCigarettes;
     if (packPrice != null) updates['packPrice'] = packPrice;
+    if (currency != null) updates['currency'] = currency;
 
     if (updates.isEmpty) return;
 
-    // 1. Update Firestore
     await _firestore.collection('users').doc(uniqueId).update(updates);
 
-    // 2. Update Hive
     final newLocalData = Map<String, dynamic>.from(currentLocalData);
     newLocalData.addAll(updates);
     await _userBox.put('userData', newLocalData);
   }
 
-  /// Stream to listen for changes to user data
   Stream<void> get userChanges => _userBox.watch(key: 'userData');
 
-  /// Uygulama girişlerini analiz etmek için alt koleksiyona (visits) kayıt atar
-  /// ve ana dökümandaki enterCount değerini artırır.
   Future<void> logAppEntry() async {
     try {
       final String? uniqueId = currentFirebaseId;
       if (uniqueId == null) return;
 
       final now = DateTime.now();
-      
-      // Tarih ve saat formatları (Screenshot ile uyumlu: 2026-04-22_09-05-35)
       final String dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       final String timeStr = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
       final String docId = "${dateStr}_${timeStr.replaceAll(':', '-')}";
@@ -170,12 +178,10 @@ class DatabaseService {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       final String version = "${packageInfo.version}+${packageInfo.buildNumber}";
 
-      // 1. Ana dökümandaki enterCount'u artır
       await _firestore.collection('users').doc(uniqueId).update({
         'enterCount': FieldValue.increment(1),
       });
 
-      // 2. Visits alt koleksiyonuna detaylı döküman ekle
       await _firestore
           .collection('users')
           .doc(uniqueId)
@@ -188,13 +194,11 @@ class DatabaseService {
         'time': timeStr,
         'timestamp': Timestamp.fromDate(now),
       });
-      
-      print('✅ Ziyaret kaydı oluşturuldu ve enterCount artırıldı: $docId');
     } catch (e) {
       print('❌ Ziyaret kaydı tutulurken hata: $e');
     }
   }
-  /// FCM Token'ı Firestore dökümanına ekler veya günceller
+
   Future<void> updateFcmToken(String token) async {
     try {
       final String? uniqueId = currentFirebaseId;
@@ -204,13 +208,11 @@ class DatabaseService {
         'fcmToken': token,
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
-      print('✅ FCM Token başarıyla güncellendi.');
     } catch (e) {
       print('❌ FCM Token güncellenirken hata: $e');
     }
   }
 
-  /// FCM Token ve Topic bilgilerini beraber günceller
   Future<void> updateFcmSubscription({required String token, required String topic}) async {
     try {
       final String? uniqueId = currentFirebaseId;
@@ -221,7 +223,6 @@ class DatabaseService {
         'fcmTopic': topic,
         'lastTokenUpdate': FieldValue.serverTimestamp(),
       });
-      print('✅ FCM Abonelik bilgileri güncellendi: $topic');
     } catch (e) {
       print('❌ FCM Abonelik güncellenirken hata: $e');
     }

@@ -24,11 +24,9 @@ class HealthProgressWidget extends StatelessWidget {
     if (rawProgress > 1.0) rawProgress = 1.0;
     if (rawProgress < 0.0) rawProgress = 0.0;
     
-    // Quadratic Progress: t^2 modeli ile daha gerçekçi hız
-    // Bu sayede %100'e ulaşmak aynı vakti alır ama ara değerler daha yavaş artar.
-    double displayProgress = rawProgress * rawProgress;
-    final int percentage = (displayProgress * 100).toInt();
+    final int percentage = (rawProgress * 100).toInt();
     final bool isCompleted = rawProgress >= 1.0;
+    final double displayProgress = rawProgress;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),

@@ -5,6 +5,7 @@ import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
 import '../../models/health_goal.dart';
 import '../widgets/health_progress_widget.dart';
+import '../app_colors.dart';
 
 class HealthView extends ConsumerStatefulWidget {
   const HealthView({super.key});
@@ -27,18 +28,16 @@ class _HealthViewState extends ConsumerState<HealthView> {
       double p = state.timeElapsed.inSeconds / adjusted.inSeconds;
       if (p > 1.0) p = 1.0;
       
-      // Karesel İlerleme: p^2 sayesinde ilerleme başında yavaş, sonuna doğru dolgun görünür.
-      // Bu bilimsel olarak "toplam hasarın azalma hızı"na daha yakındır.
-      totalProgressSum += (p * p);
+      totalProgressSum += p;
     }
     
     final double overallPurity = totalProgressSum / healthGoals.length;
     final int purityPercentage = (overallPurity * 100).toInt();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F9F4),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('health.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
+        title: Text('health.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -62,10 +61,10 @@ class _HealthViewState extends ConsumerState<HealthView> {
                 padding: const EdgeInsets.only(left: 8, bottom: 16),
                 child: Text(
                   'health.subtitle'.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: Colors.grey.shade800,
+                    color: Color(0xFF1E293B), // Slate-800
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -94,14 +93,14 @@ class _HealthViewState extends ConsumerState<HealthView> {
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
+          colors: [Color(0xFFDCFCE7), Color(0xFFBBF7D0)], // Green-100 to Green-200
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4CAF50).withOpacity(0.2),
+            color: AppColors.primary.withOpacity(0.12),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -115,7 +114,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
           const SizedBox(height: 24),
           Text(
             'health.master_purity_label'.tr(),
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF16A34A)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -128,7 +127,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
                 style: const TextStyle(
                   fontSize: 64,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF1B5E20),
+                  color: Color(0xFF15803D), // Green-700
                   letterSpacing: -2,
                 ),
               ),
@@ -141,7 +140,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF1B5E20).withOpacity(0.8),
+              color: const Color(0xFF15803D).withOpacity(0.8),
               height: 1.5,
             ),
           ),
@@ -151,7 +150,6 @@ class _HealthViewState extends ConsumerState<HealthView> {
   }
 }
 
-// Büyüyüp Küçülen (Nefes Alan) Kalp/Doğa İkonu
 class BreathingHeartIcon extends StatefulWidget {
   const BreathingHeartIcon({super.key});
 
@@ -168,7 +166,7 @@ class _BreathingHeartIconState extends State<BreathingHeartIcon> with SingleTick
     super.initState();
     _controller = AnimationController(
        vsync: this,
-       duration: const Duration(seconds: 2), // İdeal insan nefes hızı (Genişleme)
+       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.15).animate(
@@ -192,17 +190,17 @@ class _BreathingHeartIconState extends State<BreathingHeartIcon> with SingleTick
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4CAF50).withOpacity(0.4),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 20 * _scaleAnimation.value,
                   spreadRadius: 2 * _scaleAnimation.value,
                 ),
               ],
             ),
-            child: const Icon(Icons.favorite_rounded, size: 48, color: Color(0xFF4CAF50)),
+            child: const Icon(Icons.favorite_rounded, size: 48, color: AppColors.primary),
           ),
         );
       },

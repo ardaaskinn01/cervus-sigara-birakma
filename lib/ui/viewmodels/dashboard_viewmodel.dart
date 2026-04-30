@@ -8,12 +8,14 @@ class DashboardState {
   final double savedMoney;
   final double savedCO2; // in grams
   final int avoidedCigarettes;
+  final String currencySymbol;
 
   DashboardState({
     required this.timeElapsed, 
     required this.savedMoney,
     required this.savedCO2,
     required this.avoidedCigarettes,
+    required this.currencySymbol,
   });
 }
 
@@ -28,10 +30,11 @@ class DashboardViewModel extends StateNotifier<DashboardState> {
           savedMoney: 0.0,
           savedCO2: 0.0,
           avoidedCigarettes: 0,
+          currencySymbol: _db.currencySymbol,
         )) {
     _startTimer();
     
-    // Listen for Hive changes (like resetting the timer)
+    // Listen for Hive changes (like resetting the timer or changing currency)
     _dbSubscription = _db.userChanges.listen((event) {
       _timer?.cancel();
       _startTimer();
@@ -54,7 +57,6 @@ class DashboardViewModel extends StateNotifier<DashboardState> {
     final moneyPerDay = dailyCig * pricePerCig;
     final moneyPerMinute = moneyPerDay / (24 * 60);
     
-    // Per minute calculations for CO2 and avoided cigarettes
     final cigPerMinute = dailyCig / (24 * 60);
 
     _calculateTick(regDate, moneyPerMinute, cigPerMinute);
@@ -74,6 +76,7 @@ class DashboardViewModel extends StateNotifier<DashboardState> {
          savedMoney: 0.0,
          savedCO2: 0.0,
          avoidedCigarettes: 0,
+         currencySymbol: _db.currencySymbol,
        );
        return;
     }
@@ -82,13 +85,14 @@ class DashboardViewModel extends StateNotifier<DashboardState> {
     final saved = (totalMinutes * moneyPerMinute).floorToDouble();
     final totalAvoidedRaw = totalMinutes * cigPerMinute;
     final avoided = totalAvoidedRaw.floor();
-    final co2 = totalAvoidedRaw * 14.0; // Her sigara ortalama 14g CO2 üretir
+    final co2 = totalAvoidedRaw * 14.0;
 
     state = DashboardState(
       timeElapsed: difference,
       savedMoney: saved,
       savedCO2: co2,
       avoidedCigarettes: avoided,
+      currencySymbol: _db.currencySymbol,
     );
   }
 

@@ -1,7 +1,7 @@
 {
   "splash": {
     "title": "CERVUS",
-    "subtitle": "REBIRTH",
+    "subtitle": "QUITLY",
     "privacy_policy": {
       "title": "Privacy Policy and Terms of Use",
       "p1_title": "1. Data Collection",
@@ -27,6 +27,9 @@
     "daily_cig_label": "Cigarettes Per Day?",
     "pack_price_label": "Pack Price",
     "days_since_label": "Days Since You Quit?",
+    "currency_title": "Select Currency",
+    "currency_desc": "Choose the currency for calculating your savings.",
+    "currency_warning": "ATTENTION: This selection cannot be changed later.",
     "age_desc": "We will analyze health data based on your age.",
     "years_desc": "How many years have you been smoking?",
     "daily_desc": "How many cigarettes did you smoke per day?",
@@ -127,6 +130,7 @@
     "language": "Language Settings / Dil Ayarları",
     "lang_tr": "Türkçe",
     "lang_en": "English",
+    "currency": "Currency / Para Birimi",
     "privacy_policy": "Privacy Policy",
     "terms_of_service": "Terms of Service"
   },

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
 import 'crisis_view.dart';
+import '../app_colors.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -24,7 +25,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     final minutes = state.timeElapsed.inMinutes.remainder(60);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F9F4),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -46,7 +47,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF1B5E20),
+                    color: Color(0xFF064E3B),
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -57,7 +58,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 child: Text(
                   'dashboard.subtitle'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 16, color: AppColors.secondaryText, fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(height: 32),
@@ -68,7 +69,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, spreadRadius: 0, offset: const Offset(0, 12)),
@@ -78,9 +79,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildCircularTime('common.day'.tr(), days, 365, const Color(0xFF4CAF50)),
-                      _buildCircularTime('common.hour'.tr(), hours, 24, const Color(0xFF66BB6A)),
-                      _buildCircularTime('common.minute'.tr(), minutes, 60, const Color(0xFF81C784)),
+                      _buildCircularTime('common.day'.tr(), days, 365, AppColors.primary),
+                      _buildCircularTime('common.hour'.tr(), hours, 24, const Color(0xFF4ADE80)),
+                      _buildCircularTime('common.minute'.tr(), minutes, 60, const Color(0xFF86EFAC)),
                     ],
                   ),
                 ),
@@ -94,13 +95,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   padding: const EdgeInsets.all(32.0),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF47D548), Color(0xFF1B5E20)],
+                      colors: [Color(0xFF4ADE80), AppColors.primary],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      BoxShadow(color: const Color(0xFF4CAF50).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10)),
+                      BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 10)),
                     ],
                   ),
                   child: Column(
@@ -134,7 +135,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '₺',
+                            state.currencySymbol,
                             style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8)),
                           ),
                         ],
@@ -167,13 +168,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: BorderSide(color: Colors.orange.shade300, width: 2),
+                    side: const BorderSide(color: Color(0xFFFFEDD5), width: 2), // Orange-100
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    foregroundColor: Colors.orange.shade900,
+                    foregroundColor: AppColors.accent,
                     backgroundColor: Colors.white,
                     elevation: 0,
                   ),
-                  icon: Icon(Icons.warning_amber_rounded, size: 24, color: Colors.orange.shade800),
+                  icon: const Icon(Icons.warning_amber_rounded, size: 24, color: AppColors.accent),
                   label: Text(
                     'crisis.title'.tr().toUpperCase(),
                     style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
@@ -188,9 +189,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   onPressed: () => _showResetConfirmation(context, ref),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: BorderSide(color: Colors.red.shade200, width: 2),
+                    side: const BorderSide(color: Color(0xFFFEE2E2), width: 2), // Red-100
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    foregroundColor: Colors.red.shade700,
+                    foregroundColor: const Color(0xFFB91C1C), // Red-700
                     backgroundColor: Colors.white,
                     elevation: 0,
                   ),
@@ -213,16 +214,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('dashboard.reset_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        title: Text('dashboard.reset_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF0F172A))),
         content: Text(
           'dashboard.reset_desc'.tr(),
-          style: const TextStyle(fontSize: 15),
+          style: const TextStyle(fontSize: 15, color: Color(0xFF475569)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('dashboard.reset_cancel'.tr(), style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+            child: Text('dashboard.reset_cancel'.tr(), style: const TextStyle(color: AppColors.secondaryText, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -231,14 +233,15 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('dashboard.reset_success'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  backgroundColor: const Color(0xFF1B5E20),
+                  backgroundColor: const Color(0xFF16A34A),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: const Color(0xFFDC2626), // Red-600
+              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text('dashboard.reset_confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -249,7 +252,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   }
 
   Widget _buildCircularTime(String label, int value, int maxValue, Color color) {
-    // Sınır güvenliği (Eğer limit aşılırsa çember tam dolsun)
     double progress = value / maxValue;
     if (progress > 1.0) progress = 1.0;
     if (progress < 0.0) progress = 0.0;
@@ -262,13 +264,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Arka plan soft çember
               CircularProgressIndicator(
                 value: 1.0,
                 strokeWidth: 8,
                 color: color.withOpacity(0.1),
               ),
-              // İlerleyen ana çember (Yuvarlatılmış uçlarla animasyonlu hale getirilebilir ama standart widget uçları kare)
               CircularProgressIndicator(
                 value: progress,
                 strokeWidth: 8,
@@ -278,7 +278,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               Center(
                 child: Text(
                   value.toString().padLeft(2, '0'),
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1B5E20)),
+                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
                 ),
               ),
             ],
@@ -287,10 +287,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         const SizedBox(height: 16),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: Colors.grey.shade500,
+            color: AppColors.secondaryText,
             letterSpacing: 2.0,
           ),
         ),
@@ -299,7 +299,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   }
 }
 
-/// Gelişmiş Giriş Animasyonu (Fade & Slide UP)
 class FadeInSlide extends StatefulWidget {
   final Widget child;
   final Duration delay;
@@ -344,7 +343,6 @@ class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStat
   }
 }
 
-/// Modern & Şık Karbon Ayak İzi Widget'ı
 class CarbonFootprintCard extends StatelessWidget {
   final double savedCO2;
   final int avoidedCigarettes;
@@ -371,27 +369,27 @@ class CarbonFootprintCard extends StatelessWidget {
     switch (treeLevel) {
       case 1:
         treeIcon = Icons.eco_outlined;
-        primaryColor = const Color(0xFF81C784);
-        secondaryColor = const Color(0xFFC8E6C9);
+        primaryColor = const Color(0xFF4ADE80);
+        secondaryColor = const Color(0xFFDCFCE7);
         statusText = "dashboard.tree_status_1".tr();
         break;
       case 2:
         treeIcon = Icons.eco;
-        primaryColor = const Color(0xFF66BB6A);
-        secondaryColor = const Color(0xFFA5D6A7);
+        primaryColor = const Color(0xFF22C55E);
+        secondaryColor = const Color(0xFFBBF7D0);
         statusText = "dashboard.tree_status_2".tr();
         break;
       case 3:
         treeIcon = Icons.park_outlined;
-        primaryColor = const Color(0xFF43A047);
-        secondaryColor = const Color(0xFF81C784);
+        primaryColor = const Color(0xFF16A34A);
+        secondaryColor = const Color(0xFF86EFAC);
         statusText = "dashboard.tree_status_3".tr();
         break;
       case 4:
       default:
         treeIcon = Icons.park;
-        primaryColor = const Color(0xFF1B5E20);
-        secondaryColor = const Color(0xFF4CAF50);
+        primaryColor = const Color(0xFF15803D);
+        secondaryColor = const Color(0xFF4ADE80);
         statusText = "dashboard.tree_status_4".tr();
         break;
     }
@@ -400,24 +398,23 @@ class CarbonFootprintCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
         gradient: LinearGradient(
-          colors: [Colors.white, secondaryColor.withOpacity(0.3)],
+          colors: [AppColors.card, secondaryColor.withOpacity(0.2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.12),
+            color: primaryColor.withOpacity(0.08),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
         ],
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32),
         child: Stack(
           children: [
-            // Arka Plan Dekoratif Halka
             Positioned(
               right: -30,
               top: -30,
@@ -436,15 +433,14 @@ class CarbonFootprintCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      // İkon Konteynırı
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.card,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.2),
+                              color: primaryColor.withOpacity(0.15),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
@@ -471,16 +467,16 @@ class CarbonFootprintCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                color: primaryColor.withAlpha(200),
+                                color: primaryColor,
                                 letterSpacing: -0.5,
                               ),
                             ),
                             Text(
                               statusText,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade600,
+                                color: AppColors.secondaryText,
                               ),
                             ),
                           ],
@@ -489,26 +485,25 @@ class CarbonFootprintCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  // Değer Kartı
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
+                      color: AppColors.card.withOpacity(0.8),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: primaryColor.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          'dashboard.co2_saved_label'.tr(),
+                        const Text(
+                          'dashboard.co2_saved_label', // Fixed translation key access if needed, or translate directly
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1.5,
-                            color: Colors.grey.shade500,
+                            color: AppColors.secondaryText,
                           ),
-                        ),
+                        ).tr(),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -541,18 +536,17 @@ class CarbonFootprintCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Alt Bilgi
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.check_circle_rounded, size: 14, color: primaryColor),
                       const SizedBox(width: 6),
                       Text(
-                        '${'dashboard.cig_avoided'.tr()} $avoidedCigarettes \n',
-                        style: TextStyle(
+                        '${'dashboard.cig_avoided'.tr()} $avoidedCigarettes',
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade600,
+                          color: AppColors.secondaryText,
                         ),
                       ),
                     ],

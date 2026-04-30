@@ -11,7 +11,8 @@
     <application
         android:label="Cervus - Sigara Bırakma"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -41,6 +42,8 @@
             android:value="2" />
     <!-- AdMob Application ID (Production) -->
     <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-2073707860224174~2368585600" />
+    <!-- Disable Impeller on Android to avoid crashes with shadows/blur on some devices -->
+    <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

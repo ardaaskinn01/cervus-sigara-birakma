@@ -7,6 +7,7 @@ import '../../services/notification_service.dart';
 import '../../services/ad_service.dart';
 import '../../providers/database_provider.dart';
 import '../../firebase_options.dart';
+import '../app_colors.dart';
 import 'onboarding_view.dart';
 import 'main_view.dart';
 import '../widgets/privacy_policy_sheet.dart';
@@ -78,11 +79,11 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
         debugPrint('🔥 Firebase zaten başlatılmış, atlanıyor.');
       }
 
-      debugPrint('🔔 Bildirimler başlatılıyor...');
-      await NotificationService().init();
-
       final db = ref.read(databaseProvider);
       await db.init();
+
+      debugPrint('🔔 Bildirimler başlatılıyor...');
+      await NotificationService().init();
 
       // 4. Giriş Kaydı (Analytics için alt koleksiyon dökümanı oluştur)
       if (db.isRegistered) {
@@ -145,7 +146,7 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -153,9 +154,9 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE8F5E9), // Açık yeşil tonları uygulamamıza uyum için
-              Color(0xFF81C784),
-              Color(0xFF4CAF50),
+              Color(0xFFF8FAFC), // AppColors.background
+              Color(0xFFF0FDF4), // Very light green
+              Color(0xFFDCFCE7), // Light green-100
             ],
           ),
         ),
@@ -167,12 +168,27 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.1),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.eco_rounded, size: 100, color: Colors.white), // Logo ikonu
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: Image.asset(
+                      'assets/images/Quitly.png',
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 30),
                 Text(
@@ -180,24 +196,28 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
                   style: const TextStyle(
                     fontSize: 42, 
                     fontWeight: FontWeight.w900, 
-                    letterSpacing: 8, 
-                    color: Colors.white,
+                    letterSpacing: 4, 
+                    color: Color(0xFF064E3B), // Dark green
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 Text(
                   'splash.subtitle'.tr(),
                   style: TextStyle(
-                    fontSize: 14, 
-                    fontWeight: FontWeight.w600, 
-                    letterSpacing: 4, 
-                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16, 
+                    fontWeight: FontWeight.w800, 
+                    letterSpacing: 6, 
+                    color: AppColors.primary.withOpacity(0.8),
                   ),
                 ),
                 const SizedBox(height: 60),
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
-                  strokeWidth: 3,
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    strokeWidth: 3,
+                  ),
                 ),
               ],
             ),

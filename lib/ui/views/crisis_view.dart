@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
-import 'dart:async';
+import '../app_colors.dart';
 
 class CrisisView extends ConsumerStatefulWidget {
   const CrisisView({super.key});
@@ -54,7 +54,7 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
     final hours = state.timeElapsed.inHours.remainder(24);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20), // Kuyu yeşil arkaplan
+      backgroundColor: AppColors.breathBlue, // Fresh Blue for focus
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -75,7 +75,7 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
               ),
@@ -93,18 +93,25 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
                       height: 150,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.2),
-                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                        color: Colors.white.withOpacity(0.25),
+                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.15),
+                            blurRadius: 25,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
                       alignment: Alignment.center,
                       child: Transform.scale(
-                        scale: 1 / _scaleAnimation.value, // Metnin boyutlanmasını engellemek için
+                        scale: 1 / _scaleAnimation.value,
                         child: Text(
                           _breatheKey.tr(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
@@ -118,32 +125,38 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.water_drop_outlined, color: Colors.white, size: 40),
-                    const SizedBox(height: 16),
+                    const Icon(Icons.water_drop_rounded, color: Colors.white, size: 48),
+                    const SizedBox(height: 24),
                     Text(
                       'crisis.tip'.tr(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                      style: const TextStyle(
+                        color: Colors.white, 
+                        fontSize: 16, 
+                        height: 1.6,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    Divider(color: Colors.white.withOpacity(0.3)),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    Divider(color: Colors.white.withOpacity(0.3), height: 1),
+                    const SizedBox(height: 24),
                     Text(
                       days > 0 
                         ? 'crisis.success_msg'.tr(args: [days.toString(), hours.toString()]) 
                         : 'crisis.start_msg'.tr(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.yellowAccent, 
+                        color: Color(0xFFFDE68A), // Amber-200
                         fontSize: 16, 
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         height: 1.5
                       ),
                     ),

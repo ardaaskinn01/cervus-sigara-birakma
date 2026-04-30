@@ -11,6 +11,7 @@ import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'providers/database_provider.dart';
 import 'ui/views/splash_view.dart';
+import 'ui/app_colors.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -52,20 +53,28 @@ class MyApp extends ConsumerWidget {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF4F9F4),
+        scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4CAF50),
+          seedColor: AppColors.primary,
           brightness: Brightness.light,
-          primary: const Color(0xFF4CAF50),
-          secondary: const Color(0xFF81C784),
-          surface: Colors.white,
+          primary: AppColors.primary,
+          secondary: AppColors.breathBlue,
+          surface: AppColors.card,
+          onSurface: const Color(0xFF1E293B), // Dark slate for primary text
         ),
-        cardColor: Colors.white,
+        cardColor: AppColors.card,
+        dividerColor: AppColors.border,
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          foregroundColor: Color(0xFF1B5E20), // Dark green text for app structures
+          foregroundColor: Color(0xFF064E3B), // Emerald-950 for text
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF064E3B),
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
       home: const SplashView(), // Uygulamanın doğrudan ve ilk açıldığı yer

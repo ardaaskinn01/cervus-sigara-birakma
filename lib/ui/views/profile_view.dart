@@ -7,6 +7,7 @@ import '../../services/notification_service.dart';
 import '../../services/review_service.dart';
 import '../../services/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../app_colors.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
@@ -27,6 +28,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   bool _isLoading = false;
   bool _notificationsEnabled = true;
 
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +36,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final data = db.localUserData ?? {};
     
     _notificationsEnabled = db.notificationsEnabled;
+
     
     _nameController = TextEditingController(text: data['originalName']?.toString() ?? '');
     _ageController = TextEditingController(text: data['age']?.toString() ?? '');
@@ -69,7 +72,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile.update_success'.tr())),
+          SnackBar(
+            content: Text('profile.update_success'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } catch (e) {
@@ -78,7 +85,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           SnackBar(content: Text('${'profile.error'.tr()}$e')),
         );
       }
-
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -98,46 +104,46 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F9F4),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('profile.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
+        title: Text('profile.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 120), // BottomNav padding
+          padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Bilgi Güncelleme Segmenti
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text('profile.personal_info'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+                child: Text('profile.personal_info'.tr(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondaryText, letterSpacing: 1.2)),
               ),
               Form(
                 key: _formKey,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
                     ],
+                    border: Border.all(color: AppColors.border, width: 1),
                   ),
                   child: Column(
                     children: [
                       _buildFlatField('onboarding.name_label'.tr(), _nameController, Icons.badge_rounded, TextInputType.name),
-                      Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
+                      const Divider(color: AppColors.border, height: 1, indent: 56, endIndent: 24),
                       _buildFlatField('onboarding.age_label'.tr(), _ageController, Icons.cake_rounded, TextInputType.number),
-                      Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
+                      const Divider(color: AppColors.border, height: 1, indent: 56, endIndent: 24),
                       _buildFlatField('onboarding.years_smoking_label'.tr(), _yearsController, Icons.history_rounded, TextInputType.number),
-                      Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
+                      const Divider(color: AppColors.border, height: 1, indent: 56, endIndent: 24),
                       _buildFlatField('onboarding.daily_cig_label'.tr(), _dailyController, Icons.smoking_rooms_rounded, TextInputType.number),
-                      Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
+                      const Divider(color: AppColors.border, height: 1, indent: 56, endIndent: 24),
                       _buildFlatField('onboarding.pack_price_label'.tr(), _priceController, Icons.attach_money_rounded, const TextInputType.numberWithOptions(decimal: true)),
                     ],
                   ),
@@ -145,15 +151,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               ),
               const SizedBox(height: 24),
               
-              // Güncelleme Butonu (Gradient & Glow)
+              // Güncelleme Butonu
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)]),
+                  gradient: const LinearGradient(colors: [Color(0xFF4ADE80), AppColors.primary]),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
-                    BoxShadow(color: const Color(0xFF4CAF50).withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
+                    BoxShadow(color: AppColors.primary.withOpacity(0.35), blurRadius: 20, offset: const Offset(0, 8)),
                   ],
                 ),
                 child: ElevatedButton(
@@ -165,7 +171,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('profile.save_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                      : Text('profile.save_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
                 ),
               ),
               const SizedBox(height: 48),
@@ -173,21 +179,22 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               // Ayarlar Segmenti
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text('profile.app_settings'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+                child: Text('profile.app_settings'.tr(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondaryText, letterSpacing: 1.2)),
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.card,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
                   ],
+                  border: Border.all(color: AppColors.border, width: 1),
                 ),
                 child: Column(
                   children: [
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                      title: Text('profile.language'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      title: const Text('profile.language', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
                       trailing: SegmentedButton<String>(
                         segments: const [
                           ButtonSegment<String>(value: 'tr', label: Text('TR')),
@@ -199,46 +206,24 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         },
                       ),
                     ),
-                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
+                    const Divider(color: AppColors.border, height: 1, indent: 70, endIndent: 24),
                     SwitchListTile(
                       value: _notificationsEnabled,
                       onChanged: _toggleNotifications,
                       activeColor: Colors.white,
-                      activeTrackColor: const Color(0xFF4CAF50),
+                      activeTrackColor: AppColors.primary,
                       inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey.shade300,
+                      inactiveTrackColor: const Color(0xFFCBD5E1),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       secondary: Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: const Color(0xFFF1F8F1), borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.notifications_active_rounded, color: Color(0xFF4CAF50)),
+                        decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.notifications_active_rounded, color: AppColors.primary),
                       ),
-                      title: Text('profile.notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('profile.notifications_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      title: const Text('profile.notifications_title', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
+                      subtitle: Text('profile.notifications_desc'.tr(), style: const TextStyle(color: AppColors.secondaryText, fontSize: 13)),
                     ),
-                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                      onTap: () async {
-                        await NotificationService().showImmediateNotification();
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('profile.test_notify_success'.tr()),
-                            backgroundColor: const Color(0xFF4CAF50),
-                            behavior: SnackBarBehavior.floating,
-                          ));
-                        }
-                      },
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.send_rounded, color: Color(0xFF4CAF50)),
-                      ),
-                      title: Text('profile.test_notify_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('profile.test_notify_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
-                    ),
-                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
+                    const Divider(color: AppColors.border, height: 1, indent: 70, endIndent: 24),
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       onTap: () async {
@@ -246,14 +231,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       },
                       leading: Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.star_rounded, color: Colors.amber),
+                        decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.star_rounded, color: Color(0xFFD97706)),
                       ),
-                      title: Text('profile.rate_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('profile.rate_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                      trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+                      title: const Text('profile.rate_title', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
+                      subtitle: Text('profile.rate_desc'.tr(), style: const TextStyle(color: AppColors.secondaryText, fontSize: 13)),
+                      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText),
                     ),
-                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
+                    const Divider(color: AppColors.border, height: 1, indent: 70, endIndent: 24),
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                       onTap: () async {
@@ -264,11 +249,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       },
                       leading: Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.privacy_tip_rounded, color: Colors.blue),
+                        decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.privacy_tip_rounded, color: Color(0xFF2563EB)),
                       ),
-                      title: Text('profile.privacy_policy'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      trailing: Icon(Icons.open_in_new_rounded, color: Colors.grey.shade400, size: 20),
+                      title: const Text('profile.privacy_policy', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
+                      trailing: const Icon(Icons.open_in_new_rounded, color: AppColors.secondaryText, size: 20),
                     ),
                   ],
                 ),
@@ -286,11 +271,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       child: TextFormField(
         controller: controller,
         keyboardType: type,
-        style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF1B5E20), fontSize: 16),
+        style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF0F172A), fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.normal),
-          prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 22),
+          labelStyle: const TextStyle(color: AppColors.secondaryText, fontWeight: FontWeight.normal),
+          prefixIcon: Icon(icon, color: const Color(0xFFCBD5E1), size: 22),
           border: InputBorder.none,
           focusedBorder: InputBorder.none,
           enabledBorder: InputBorder.none,
