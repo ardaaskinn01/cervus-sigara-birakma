@@ -40,7 +40,7 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 2000),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -106,7 +106,7 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
 
       // İşlemler biter bitmez yönlendir (Timer'ı bekleme, akıcı bir geçiş için ekstra beklet)
       if (mounted && !_isNavigated) {
-        await Future.delayed(const Duration(milliseconds: 800));
+        await Future.delayed(const Duration(milliseconds: 1500));
         _navigateToNext();
       }
     } catch (e) {
@@ -197,16 +197,16 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
                     fontSize: 42, 
                     fontWeight: FontWeight.w900, 
                     letterSpacing: 4, 
-                    color: Color(0xFF064E3B), // Dark green
+                    color: Color(0xFF064E3B), 
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   'splash.subtitle'.tr(),
                   style: TextStyle(
-                    fontSize: 16, 
+                    fontSize: 14, 
                     fontWeight: FontWeight.w800, 
-                    letterSpacing: 6, 
+                    letterSpacing: 2, 
                     color: AppColors.primary.withOpacity(0.8),
                   ),
                 ),

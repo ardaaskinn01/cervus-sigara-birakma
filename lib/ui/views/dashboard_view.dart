@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
 import 'crisis_view.dart';
+import 'calendar_view.dart';
 import '../app_colors.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
@@ -27,14 +28,37 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CalendarView()),
+              ),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 3)),
+                  ],
+                ),
+                child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF064E3B), size: 22),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 8.0, bottom: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -86,7 +110,89 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+
+              // Kriz ve Sıfırla Butonları Yan Yana
+              FadeInSlide(
+                delay: const Duration(milliseconds: 350),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CrisisView()),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED), // Very light orange
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFFFDBA74), width: 2), // Orange 300
+                            boxShadow: [
+                              BoxShadow(color: const Color(0xFFF97316).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bolt_rounded, size: 32, color: Color(0xFFEA580C)), // Orange 600
+                              const SizedBox(height: 8),
+                              Text(
+                                'crisis.title'.tr(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                  color: Color(0xFF9A3412), // Orange 800
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _showResetConfirmation(context, ref),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2), // Very light red
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFFFECACA), width: 2), // Red 200
+                            boxShadow: [
+                              BoxShadow(color: const Color(0xFFEF4444).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.refresh_rounded, size: 32, color: Color(0xFFDC2626)), // Red 600
+                              const SizedBox(height: 8),
+                              Text(
+                                'dashboard.reset_confirm'.tr(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                  color: Color(0xFF991B1B), // Red 800
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
 
               // Kurtarılan Bütçe Kartı (LinearGradient & Glass Effect)
               FadeInSlide(
@@ -156,52 +262,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ),
               const SizedBox(height: 24),
 
-              // Krize Müdahale Butonu
-              FadeInSlide(
-                delay: const Duration(milliseconds: 500),
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CrisisView()),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: const BorderSide(color: Color(0xFFFFEDD5), width: 2), // Orange-100
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    foregroundColor: AppColors.accent,
-                    backgroundColor: Colors.white,
-                    elevation: 0,
-                  ),
-                  icon: const Icon(Icons.warning_amber_rounded, size: 24, color: AppColors.accent),
-                  label: Text(
-                    'crisis.title'.tr().toUpperCase(),
-                    style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Sigara İçtim Butonu
-              FadeInSlide(
-                delay: const Duration(milliseconds: 1400),
-                child: OutlinedButton.icon(
-                  onPressed: () => _showResetConfirmation(context, ref),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: const BorderSide(color: Color(0xFFFEE2E2), width: 2), // Red-100
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    foregroundColor: const Color(0xFFB91C1C), // Red-700
-                    backgroundColor: Colors.white,
-                    elevation: 0,
-                  ),
-                  icon: const Icon(Icons.refresh_rounded, size: 22),
-                  label: Text(
-                    'dashboard.reset_confirm'.tr().toUpperCase(),
-                    style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
-                  ),
-                ),
-              ),
               const SizedBox(height: 32),
             ],
           ),

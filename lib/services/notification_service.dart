@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'database_service.dart';
 
@@ -21,7 +22,7 @@ class NotificationService {
     if (_initialized) return;
 
     // 1. Timezone verilerini yükle
-    tz.initializeTimeZones();
+    tz_data.initializeTimeZones();
     
     // 2. Telefonun Yerel Saat Dilimini Ayarla
     try {
@@ -187,7 +188,7 @@ class NotificationService {
     );
   }
 
-  /// Günlük periyodik bildirimleri ayarla (Öğlen 12 ve Akşam 20:00)
+  /// 5 Sabah / 5 Akşam olmak üzere önümüzdeki 5 gün için rastgele dinamik bildirim ayarlar
   Future<void> schedulePeriodicNotifications() async {
     // Önce eski tüm bildirimleri temizleyelim (çakışma olmaması için)
     await cancelAllNotifications();
@@ -202,27 +203,63 @@ class NotificationService {
     const iosDetails = DarwinNotificationDetails();
     const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-    // 1. Bildirim: Öğlen 12:00
-    await _notificationsPlugin.zonedSchedule(
-      1200,
-      'Günün Yarısı Tamam! 💪',
-      'Bugün hiç sigara içmedin. Harika ilerliyorsun!',
-      _nextInstanceOfTime(12, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // Her gün aynı saatte tekrarla
-    );
+    List<dynamic> morningTexts = [];
+    List<dynamic> eveningTexts = [];
+    
+    try {
+      final doc = await FirebaseFirestore.instance.collection('texts').doc('motivations').get();
+      if (doc.exists) {
+        morningTexts = List.from(doc.data()?['morning'] ?? []);
+        eveningTexts = List.from(doc.data()?['evening'] ?? []);
+      }
+    } catch (e) {
+      print('❌ Firebase metinleri çekilemedi, fallbacks kullanılacak: $e');
+    }
+    
+    // Varsayılan metinler (Eğer internet yoksa veya Firestore başarısız olursa)
+    if (morningTexts.isEmpty) {
+      morningTexts = [
+        {'title': 'Yeni Bir Gün, Temiz Nefes! 🌅', 'body': 'Bugün kahvenin tadı bir başka güzel değil mi? Harika ilerliyorsun!'},
+        {'title': 'Sabah Enerjisi! 🏃‍♂️', 'body': 'Uyanmak eskisinden daha kolay. Güne çok daha zinde başlıyorsun.'}
+      ];
+    }
+    if (eveningTexts.isEmpty) {
+      eveningTexts = [
+        {'title': 'İyi Akşamlar! 🌿', 'body': 'Günü tertemiz bitirmek üzeresin. Akciğerlerin sana teşekkür ediyor.'},
+        {'title': 'Günü Başarıyla Tamamladın! 🌙', 'body': 'Bir günü daha dumansız bitirdin. Gurur duy!'}
+      ];
+    }
+    
+    // Rastgele dağılım için metinleri karıştırıyoruz
+    morningTexts.shuffle();
+    eveningTexts.shuffle();
 
-    // 2. Bildirim: Akşam 20:00
-    await _notificationsPlugin.zonedSchedule(
-      2000,
-      'İyi Akşamlar! 🌿',
-      'Günü tertemiz bitirmek üzeresin. Akciğerlerin sana teşekkür ediyor.',
-      _nextInstanceOfTime(20, 0),
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // Her gün aynı saatte tekrarla
-    );
+    int notifId = 1000;
+    
+    // Önümüzdeki 5 gün için (0. günden 4. güne kadar) sabah ve akşam bildirimi kuralım
+    for (int i = 0; i < 5; i++) {
+        // Sabah 09:30 Bildirimi
+        final currentMorning = morningTexts[i % morningTexts.length];
+        await _notificationsPlugin.zonedSchedule(
+          notifId++,
+          currentMorning['title'].toString(),
+          currentMorning['body'].toString(),
+          _nextInstanceOfTime(9, 30).add(Duration(days: i)),
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+        
+        // Akşam 20:30 Bildirimi
+        final currentEvening = eveningTexts[i % eveningTexts.length];
+        await _notificationsPlugin.zonedSchedule(
+          notifId++,
+          currentEvening['title'].toString(),
+          currentEvening['body'].toString(),
+          _nextInstanceOfTime(20, 30).add(Duration(days: i)),
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+    }
   }
 
   /// Belirtilen saat ve dakika için bir sonraki zaman dilimini hesapla

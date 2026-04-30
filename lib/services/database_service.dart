@@ -91,17 +91,61 @@ class DatabaseService {
 
       final now = DateTime.now();
       final nowStr = now.toIso8601String();
+      final String dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
       await _firestore.collection('users').doc(uniqueId).update({
         'registrationDate': FieldValue.serverTimestamp(),
+        'smokedDays': FieldValue.arrayUnion([dateStr]),
       });
 
       final newLocalData = Map<String, dynamic>.from(currentLocalData);
       newLocalData['registrationDate'] = nowStr;
+      final List<dynamic> currentSmokedDays = List<dynamic>.from(newLocalData['smokedDays'] ?? []);
+      if (!currentSmokedDays.contains(dateStr)) currentSmokedDays.add(dateStr);
+      newLocalData['smokedDays'] = currentSmokedDays;
       await _userBox.put('userData', newLocalData);
     } catch (e) {
       throw Exception('Sayaç sıfırlanırken hata oluştu: $e');
     }
+  }
+
+  /// Kriz yaşanan günü Firebase ve Hive'a kaydeder (tekrar eklemez)
+  Future<void> logCrisisDay() async {
+    try {
+      final String? uniqueId = currentFirebaseId;
+      if (uniqueId == null) return;
+
+      final now = DateTime.now();
+      final String dateStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      await _firestore.collection('users').doc(uniqueId).update({
+        'crisisDays': FieldValue.arrayUnion([dateStr]),
+      });
+
+      final Map<dynamic, dynamic>? currentLocalData = localUserData;
+      if (currentLocalData != null) {
+        final newLocalData = Map<String, dynamic>.from(currentLocalData);
+        final List<dynamic> currentCrisisDays = List<dynamic>.from(newLocalData['crisisDays'] ?? []);
+        if (!currentCrisisDays.contains(dateStr)) currentCrisisDays.add(dateStr);
+        newLocalData['crisisDays'] = currentCrisisDays;
+        await _userBox.put('userData', newLocalData);
+      }
+    } catch (e) {
+      print('❌ Kriz günü kaydedilirken hata: $e');
+    }
+  }
+
+  // Takvim verisi getterları
+  List<String> get smokedDays {
+    final data = localUserData;
+    if (data == null) return [];
+    return List<String>.from(data['smokedDays'] ?? []);
+  }
+
+  List<String> get crisisDays {
+    final data = localUserData;
+    if (data == null) return [];
+    return List<String>.from(data['crisisDays'] ?? []);
   }
 
   // Getters for Local Data

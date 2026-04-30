@@ -1,7 +1,7 @@
 {
   "splash": {
-    "title": "CERVUS",
-    "subtitle": "QUITLY",
+    "title": "QUITLY",
+    "subtitle": "YOUR QUITTING ASSISTANT",
     "privacy_policy": {
       "title": "Privacy Policy and Terms of Use",
       "p1_title": "1. Data Collection",
@@ -105,12 +105,6 @@
     "drink_water": "Drink Water",
     "distract": "Distract Yourself",
     "motivate": "Motivational Quote"
-  },
-  "leaderboard": {
-    "title": "Leaderboard",
-    "error": "An error occurred: ",
-    "empty": "No one is registered yet.",
-    "days": "Days"
   },
   "profile": {
     "title": "Profile & Settings",

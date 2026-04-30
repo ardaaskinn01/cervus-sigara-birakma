@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
+import '../../providers/database_provider.dart';
 import '../app_colors.dart';
 
 class CrisisView extends ConsumerStatefulWidget {
@@ -39,6 +40,11 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
     });
 
     _breathingController.forward();
+    
+    // Kriz günü kaydı — otomatik olarak Firebase'e yaz
+    Future.microtask(() {
+      ref.read(databaseProvider).logCrisisDay();
+    });
   }
 
   @override

@@ -1,7 +1,7 @@
 {
   "splash": {
-    "title": "CERVUS",
-    "subtitle": "QUITLY",
+    "title": "QUITLY",
+    "subtitle": "SİGARAYI BIRAKMA YARDIMCINIZ",
     "privacy_policy": {
       "title": "Gizlilik Politikası ve Kullanım Koşulları",
       "p1_title": "1. Veri Toplama",
@@ -57,7 +57,7 @@
     "reset_title": "Emin misin?",
     "reset_desc": "Sigara içtiğini onaylıyorsun. Sürecin baştan başlayacak.",
     "reset_cancel": "VAZGEÇ",
-    "reset_confirm": "SIFIRLA",
+    "reset_confirm": "SİGARA İÇTİM",
     "reset_success": "Sayaç sıfırlandı. Asla pes etme!"
   },
   "health": {
@@ -95,7 +95,7 @@
     "lungs": "Akciğer Kapasitesi"
   },
   "crisis": {
-    "title": "Kriz Anı",
+    "title": "KRİZ ANI",
     "breathe_in": "Nefes Al",
     "breathe_out": "Nefes Ver",
     "tip": "Krizler genelde 3-5 dakika sürer. Büyük bir bardak su iç ve aklını başka bir şeye odakla.",
@@ -105,12 +105,6 @@
     "drink_water": "Su İç",
     "distract": "Aklını Dağıt",
     "motivate": "Motivasyon Sözü"
-  },
-  "leaderboard": {
-    "title": "Liderlik Tablosu",
-    "error": "Bir hata oluştu: ",
-    "empty": "Henüz kimse kayıtlı değil.",
-    "days": "Gün"
   },
   "profile": {
     "title": "Profil & Ayarlar",
