@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/database_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../services/notification_service.dart';
+import '../../services/review_service.dart';
+import '../../services/app_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
@@ -64,15 +69,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil bilgilerin güncellendi! ✅')),
+          SnackBar(content: Text('profile.update_success'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
+          SnackBar(content: Text('${'profile.error'.tr()}$e')),
         );
       }
+
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -94,10 +100,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F9F4),
       appBar: AppBar(
-        title: const Text('Profil & Ayarlar', style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
+        title: Text('profile.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -109,7 +116,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               // Bilgi Güncelleme Segmenti
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text('KİŞİSEL BİLGİLER', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+                child: Text('profile.personal_info'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
               ),
               Form(
                 key: _formKey,
@@ -123,15 +130,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   ),
                   child: Column(
                     children: [
-                      _buildFlatField('İsim', _nameController, Icons.badge_rounded, TextInputType.name),
+                      _buildFlatField('onboarding.name_label'.tr(), _nameController, Icons.badge_rounded, TextInputType.name),
                       Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
-                      _buildFlatField('Yaş', _ageController, Icons.cake_rounded, TextInputType.number),
+                      _buildFlatField('onboarding.age_label'.tr(), _ageController, Icons.cake_rounded, TextInputType.number),
                       Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
-                      _buildFlatField('Kaç Yıldır İçiyorsun?', _yearsController, Icons.history_rounded, TextInputType.number),
+                      _buildFlatField('onboarding.years_smoking_label'.tr(), _yearsController, Icons.history_rounded, TextInputType.number),
                       Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
-                      _buildFlatField('Günde Kaç Dal?', _dailyController, Icons.smoking_rooms_rounded, TextInputType.number),
+                      _buildFlatField('onboarding.daily_cig_label'.tr(), _dailyController, Icons.smoking_rooms_rounded, TextInputType.number),
                       Divider(color: Colors.grey.shade100, height: 1, indent: 56, endIndent: 24),
-                      _buildFlatField('Güncel Paket Fiyatı (TL)', _priceController, Icons.attach_money_rounded, const TextInputType.numberWithOptions(decimal: true)),
+                      _buildFlatField('onboarding.pack_price_label'.tr(), _priceController, Icons.attach_money_rounded, const TextInputType.numberWithOptions(decimal: true)),
                     ],
                   ),
                 ),
@@ -158,7 +165,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('BİLGİLERİ KAYDET', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+                      : Text('profile.save_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
                 ),
               ),
               const SizedBox(height: 48),
@@ -166,7 +173,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               // Ayarlar Segmenti
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text('UYGULAMA', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+                child: Text('profile.app_settings'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
               ),
               Container(
                 decoration: BoxDecoration(
@@ -178,6 +185,21 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 ),
                 child: Column(
                   children: [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      title: Text('profile.language'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      trailing: SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment<String>(value: 'tr', label: Text('TR')),
+                          ButtonSegment<String>(value: 'en', label: Text('EN')),
+                        ],
+                        selected: {ref.watch(languageProvider).languageCode},
+                        onSelectionChanged: (Set<String> newSelection) {
+                          ref.read(languageProvider.notifier).changeLanguage(context, newSelection.first);
+                        },
+                      ),
+                    ),
+                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
                     SwitchListTile(
                       value: _notificationsEnabled,
                       onChanged: _toggleNotifications,
@@ -191,8 +213,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         decoration: BoxDecoration(color: const Color(0xFFF1F8F1), borderRadius: BorderRadius.circular(12)),
                         child: const Icon(Icons.notifications_active_rounded, color: Color(0xFF4CAF50)),
                       ),
-                      title: const Text('Motivasyon Bildirimleri', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('Günde 2 kez destek mesajı al.', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      title: Text('profile.notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      subtitle: Text('profile.notifications_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
                     ),
                     Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
                     ListTile(
@@ -200,9 +222,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       onTap: () async {
                         await NotificationService().showImmediateNotification();
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Test bildirimi gönderildi! 🔔'),
-                            backgroundColor: Color(0xFF4CAF50),
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('profile.test_notify_success'.tr()),
+                            backgroundColor: const Color(0xFF4CAF50),
                             behavior: SnackBarBehavior.floating,
                           ));
                         }
@@ -212,29 +234,41 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(12)),
                         child: const Icon(Icons.send_rounded, color: Color(0xFF4CAF50)),
                       ),
-                      title: const Text('Test Bildirimi Gönder', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('Bildirimlerin çalışıp çalışmadığını test et.', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      title: Text('profile.test_notify_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      subtitle: Text('profile.test_notify_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
                       trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
                     ),
                     Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text('Destekleriniz için teşekkürler! ❤️', style: TextStyle(fontWeight: FontWeight.bold)),
-                          backgroundColor: const Color(0xFF1B5E20),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ));
+                      onTap: () async {
+                        await ReviewService().requestReview();
                       },
                       leading: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(12)),
                         child: const Icon(Icons.star_rounded, color: Colors.amber),
                       ),
-                      title: const Text('Bizi Puanlayın', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
-                      subtitle: Text('Uygulamayı destekleyin.', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      title: Text('profile.rate_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      subtitle: Text('profile.rate_desc'.tr(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
                       trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+                    ),
+                    Divider(color: Colors.grey.shade100, height: 1, indent: 70, endIndent: 24),
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      onTap: () async {
+                        final url = Uri.parse(AppConstants.privacyPolicyUrl);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.privacy_tip_rounded, color: Colors.blue),
+                      ),
+                      title: Text('profile.privacy_policy'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B5E20))),
+                      trailing: Icon(Icons.open_in_new_rounded, color: Colors.grey.shade400, size: 20),
                     ),
                   ],
                 ),
@@ -264,7 +298,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           disabledBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        validator: (v) => v == null || v.trim().isEmpty ? 'Gerekli alan' : null,
+        validator: (v) => v == null || v.trim().isEmpty ? 'onboarding.required_error'.tr() : null,
       ),
     );
   }

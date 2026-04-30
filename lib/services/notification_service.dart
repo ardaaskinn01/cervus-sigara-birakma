@@ -1,6 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'database_service.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -9,6 +11,8 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   bool _initialized = false;
 
@@ -56,7 +60,110 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>();
     await androidImplementation?.requestNotificationsPermission();
 
+    // 7. FCM Kurulumu
+    await _setupFcm();
+
     _initialized = true;
+  }
+
+  /// Token'ı veritabanına zorla günceller ve topic aboneliği yapar
+  Future<void> updateTokenToDatabase() async {
+    try {
+      final String? uniqueId = DatabaseService().currentFirebaseId;
+      String? token = await _messaging.getToken();
+      
+      if (token != null) {
+        if (uniqueId != null) {
+          String topic = 'user_$uniqueId';
+          await _messaging.subscribeToTopic(topic);
+          await DatabaseService().updateFcmSubscription(token: token, topic: topic);
+        } else {
+          await DatabaseService().updateFcmToken(token);
+        }
+      }
+    } catch (e) {
+      print('❌ FCM Token/Topic güncellenemedi: $e');
+    }
+  }
+
+  /// FCM (Firebase Cloud Messaging) Ayarları
+  Future<void> _setupFcm() async {
+    // 1. İzin İste (iOS ve Android 13+)
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('✅ Kullanıcı bildirim izni verdi.');
+    } else {
+      print('❌ Kullanıcı bildirim iznini reddetti veya kısmi izin verdi.');
+    }
+
+    // 2. Token Al ve Kaydet
+    try {
+      final String? uniqueId = DatabaseService().currentFirebaseId;
+      
+      String? token = await _messaging.getToken();
+      if (token != null) {
+        print('📱 FCM Token: $token');
+        
+        // Bireysel Topic Aboneliği (Tekli mesaj atabilmek için)
+        if (uniqueId != null) {
+          String topic = 'user_$uniqueId';
+          await _messaging.subscribeToTopic(topic);
+          print('🔔 Subscribed to topic: $topic');
+          
+          // Token ve Topic'i Firestore'a kaydet
+          await DatabaseService().updateFcmSubscription(token: token, topic: topic);
+        } else {
+          await updateTokenToDatabase();
+        }
+      }
+    } catch (e) {
+      print('❌ FCM Token veya Topic hatası: $e');
+    }
+
+    // 3. Token Yenilenirse Takip Et
+    _messaging.onTokenRefresh.listen((newToken) async {
+      await DatabaseService().updateFcmToken(newToken);
+    });
+
+    // 4. Foreground (Uygulama açıkken) mesajlarını dinle
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📩 Foreground mesaj geldi: ${message.notification?.title}');
+      
+      // Eğer uygulama açıkken bildirim kutusu da çıksın istiyorsak local notification tetikliyoruz
+      if (message.notification != null) {
+        _showLocalNotificationFromFcm(message.notification!);
+      }
+    });
+
+    // 5. Uygulama arka plandayken bildirime tıklandığında
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('🖱️ Arka planda bildirime tıklandı!');
+    });
+  }
+
+  /// FCM'den gelen bildirimi local olarak göster (Foreground için)
+  Future<void> _showLocalNotificationFromFcm(RemoteNotification notification) async {
+    const androidDetails = AndroidNotificationDetails(
+      'fcm_default_channel',
+      'Push Bildirimleri',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const iosDetails = DarwinNotificationDetails();
+    const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+    await _notificationsPlugin.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      details,
+    );
   }
 
   /// Anında bildirim (Test için en hızlı yol)

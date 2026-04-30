@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dashboard_view.dart';
 import 'health_view.dart';
 import 'leaderboard_view.dart';
@@ -80,10 +81,10 @@ class _MainViewState extends State<MainView> {
                   letterSpacing: 0.2,
                 ),
                 items: [
-                  _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'Durum', 0),
-                  _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'Sağlık', 1),
-                  _buildNavItem(Icons.emoji_events_rounded, Icons.emoji_events_outlined, 'Liderlik', 2),
-                  _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'Profil', 3),
+                  _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
+                  _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
+                  _buildNavItem(Icons.emoji_events_rounded, Icons.emoji_events_outlined, 'leaderboard.title'.tr(), 2),
+                  _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 3),
                 ],
               ),
             ),

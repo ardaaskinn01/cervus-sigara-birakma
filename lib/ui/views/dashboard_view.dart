@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
 import 'crisis_view.dart';
@@ -40,7 +41,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               FadeInSlide(
                 delay: const Duration(milliseconds: 100),
                 child: Text(
-                  'Harikasın $userName!',
+                  'dashboard.greeting'.tr(args: [userName]),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 32,
@@ -54,7 +55,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               FadeInSlide(
                 delay: const Duration(milliseconds: 200),
                 child: Text(
-                  'Tertemiz bir hayata adım atalı:',
+                  'dashboard.subtitle'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
                 ),
@@ -77,9 +78,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildCircularTime('GÜN', days, 365, const Color(0xFF4CAF50)),
-                      _buildCircularTime('SAAT', hours, 24, const Color(0xFF66BB6A)),
-                      _buildCircularTime('DAKİKA', minutes, 60, const Color(0xFF81C784)),
+                      _buildCircularTime('common.day'.tr(), days, 365, const Color(0xFF4CAF50)),
+                      _buildCircularTime('common.hour'.tr(), hours, 24, const Color(0xFF66BB6A)),
+                      _buildCircularTime('common.minute'.tr(), minutes, 60, const Color(0xFF81C784)),
                     ],
                   ),
                 ),
@@ -114,7 +115,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Kurtarılan Bütçe',
+                        'dashboard.money_saved'.tr(),
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white.withOpacity(0.9)),
                       ),
                       const SizedBox(height: 8),
@@ -173,9 +174,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                     elevation: 0,
                   ),
                   icon: Icon(Icons.warning_amber_rounded, size: 24, color: Colors.orange.shade800),
-                  label: const Text(
-                    'İÇMEK ÜZEREYİM',
-                    style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                  label: Text(
+                    'crisis.title'.tr().toUpperCase(),
+                    style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
                   ),
                 ),
               ),
@@ -194,9 +195,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                     elevation: 0,
                   ),
                   icon: const Icon(Icons.refresh_rounded, size: 22),
-                  label: const Text(
-                    'SİGARA İÇTİM (YENİDEN BAŞLA)',
-                    style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                  label: Text(
+                    'dashboard.reset_confirm'.tr().toUpperCase(),
+                    style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
                   ),
                 ),
               ),
@@ -213,15 +214,15 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Emin misin?', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text(
-          'Bu işlem tüm ilerlemeni ve kurtarılan bütçeni sıfırlayacaktır. Yeni ve daha güçlü bir başlangıç yapmak istiyor musun?',
-          style: TextStyle(fontSize: 15),
+        title: Text('dashboard.reset_title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text(
+          'dashboard.reset_desc'.tr(),
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('VAZGEÇ', style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+            child: Text('dashboard.reset_cancel'.tr(), style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -229,7 +230,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Sayaç sıfırlandı. Asla pes etme!', style: TextStyle(fontWeight: FontWeight.bold)),
+                  content: Text('dashboard.reset_success'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                   backgroundColor: const Color(0xFF1B5E20),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -240,7 +241,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               backgroundColor: Colors.red.shade600,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('SIFIRLA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text('dashboard.reset_confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -372,26 +373,26 @@ class CarbonFootprintCard extends StatelessWidget {
         treeIcon = Icons.eco_outlined;
         primaryColor = const Color(0xFF81C784);
         secondaryColor = const Color(0xFFC8E6C9);
-        statusText = "Doğa Tohumları Atıldı";
+        statusText = "dashboard.tree_status_1".tr();
         break;
       case 2:
         treeIcon = Icons.eco;
         primaryColor = const Color(0xFF66BB6A);
         secondaryColor = const Color(0xFFA5D6A7);
-        statusText = "Fidanın Büyüyor";
+        statusText = "dashboard.tree_status_2".tr();
         break;
       case 3:
         treeIcon = Icons.park_outlined;
         primaryColor = const Color(0xFF43A047);
         secondaryColor = const Color(0xFF81C784);
-        statusText = "Genç Bir Ağaç Oldu";
+        statusText = "dashboard.tree_status_3".tr();
         break;
       case 4:
       default:
         treeIcon = Icons.park;
         primaryColor = const Color(0xFF1B5E20);
         secondaryColor = const Color(0xFF4CAF50);
-        statusText = "Koca Bir Çınar Yolunda";
+        statusText = "dashboard.tree_status_4".tr();
         break;
     }
 
@@ -466,7 +467,7 @@ class CarbonFootprintCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Doğaya Katkın',
+                              'dashboard.nature_contribution'.tr(),
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
@@ -500,7 +501,7 @@ class CarbonFootprintCard extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'KURTARILAN CO2',
+                          'dashboard.co2_saved_label'.tr(),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -547,7 +548,7 @@ class CarbonFootprintCard extends StatelessWidget {
                       Icon(Icons.check_circle_rounded, size: 14, color: primaryColor),
                       const SizedBox(width: 6),
                       Text(
-                        'İçilmeyen $avoidedCigarettes sigara sayesinde',
+                        '${'dashboard.cig_avoided'.tr()} $avoidedCigarettes \n',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

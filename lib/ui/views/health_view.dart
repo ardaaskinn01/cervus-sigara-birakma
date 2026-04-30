@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
 import '../../models/health_goal.dart';
@@ -37,7 +38,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F9F4),
       appBar: AppBar(
-        title: const Text('İyileşme Süreci', style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
+        title: Text('health.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -60,7 +61,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 16),
                 child: Text(
-                  'Aşama Aşama Yenilenme',
+                  'health.subtitle'.tr(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -112,9 +113,9 @@ class _HealthViewState extends ConsumerState<HealthView> {
           // Nefes Alan / Kalp Atan Animasyonlu İkon
           const BreathingHeartIcon(),
           const SizedBox(height: 24),
-          const Text(
-            'Genel Vücut Arınması',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32)),
+          Text(
+            'health.master_purity_label'.tr(),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -135,7 +136,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Her saniye bedenindeki hücreler mucizevi bir şekilde kendini onarıyor. Derin bir nefes al ve bu tazeliği hisset.',
+            'health.master_purity_desc'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,

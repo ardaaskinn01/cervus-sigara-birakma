@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import 'dart:async';
 
@@ -13,7 +14,7 @@ class CrisisView extends ConsumerStatefulWidget {
 class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProviderStateMixin {
   late AnimationController _breathingController;
   late Animation<double> _scaleAnimation;
-  String _breatheText = "Nefes Al";
+  String _breatheKey = "crisis.breathe_in";
 
   @override
   void initState() {
@@ -29,10 +30,10 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
 
     _breathingController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        setState(() => _breatheText = "Nefes Ver");
+        setState(() => _breatheKey = "crisis.breathe_out");
         _breathingController.reverse();
       } else if (status == AnimationStatus.dismissed) {
-        setState(() => _breatheText = "Nefes Al");
+        setState(() => _breatheKey = "crisis.breathe_in");
         _breathingController.forward();
       }
     });
@@ -67,12 +68,12 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Başlık
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
-                "Derin Bir Nefes Al",
+                'crisis.title'.tr(),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -99,7 +100,7 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
                       child: Transform.scale(
                         scale: 1 / _scaleAnimation.value, // Metnin boyutlanmasını engellemek için
                         child: Text(
-                          _breatheText,
+                          _breatheKey.tr(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -126,18 +127,18 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
                   children: [
                     const Icon(Icons.water_drop_outlined, color: Colors.white, size: 40),
                     const SizedBox(height: 16),
-                    const Text(
-                      "Krizler genelde 3-5 dakika sürer. Büyük bir bardak su iç ve aklını başka bir şeye odakla.",
+                    Text(
+                      'crisis.tip'.tr(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                      style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
                     ),
                     const SizedBox(height: 16),
                     Divider(color: Colors.white.withOpacity(0.3)),
                     const SizedBox(height: 16),
                     Text(
                       days > 0 
-                        ? "Tam $days gün $hours saattir başarıyorsun. \nBunu çöpe atmaya değmez!" 
-                        : "Daha yeni başladın, ilk günler en zorudur. \nTam şu an direnmeye ihtiyacımız var!",
+                        ? 'crisis.success_msg'.tr(args: [days.toString(), hours.toString()]) 
+                        : 'crisis.start_msg'.tr(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.yellowAccent, 

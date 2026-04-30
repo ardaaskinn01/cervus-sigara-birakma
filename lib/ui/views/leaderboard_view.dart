@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/database_provider.dart';
 import '../widgets/banner_ad_widget.dart';
 
@@ -15,7 +16,7 @@ class LeaderboardView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F9F4),
       appBar: AppBar(
-        title: const Text('Liderlik Tablosu', style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
+        title: Text('leaderboard.title'.tr(), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -31,10 +32,10 @@ class LeaderboardView extends ConsumerWidget {
               return const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)));
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Bir hata oluştu: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+              return Center(child: Text('${'leaderboard.error'.tr()}${snapshot.error}', style: const TextStyle(color: Colors.red)));
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('Henüz kimse kayıtlı değil.', style: TextStyle(color: Colors.grey)));
+              return Center(child: Text('leaderboard.empty'.tr(), style: const TextStyle(color: Colors.grey)));
             }
 
             final docs = snapshot.data!.docs;
@@ -149,7 +150,7 @@ class LeaderboardView extends ConsumerWidget {
                 ),
               ),
               Text(
-                'GÜN',
+                'leaderboard.days'.tr(),
                 style: TextStyle(
                   fontSize: 12,
                   color: isTop3 ? Colors.white.withOpacity(0.8) : Colors.grey.shade500,

@@ -28,53 +28,53 @@ class HealthGoal {
 
 const List<HealthGoal> healthGoals = [
   HealthGoal(
-    title: 'Kalp Ritmi Düzelir',
-    description: 'Kan basıncı ve nabız normale döner. El ve ayak sıcaklığı artar.',
+    title: 'health.goal_0_title',
+    description: 'health.goal_0_desc',
     baseDuration: Duration(minutes: 20),
   ),
   HealthGoal(
-    title: 'Karbonmonoksit Temizlenir',
-    description: 'Kandaki karbonmonoksit seviyesi normale döner, oksijen seviyesi artar.',
+    title: 'health.goal_1_title',
+    description: 'health.goal_1_desc',
     baseDuration: Duration(hours: 8),
   ),
   HealthGoal(
-    title: 'Kalp Krizi Riski Azalır',
-    description: 'Vücut sistemleri rahatlar, kalp krizi geçirme riski düşmeye başlar.',
+    title: 'health.goal_2_title',
+    description: 'health.goal_2_desc',
     baseDuration: Duration(hours: 24),
   ),
   HealthGoal(
-    title: 'Tat ve Koku Alma Artar',
-    description: 'Sinir uçları kendini onarmaya başlar. Tat ve koku alma yeteneği güçlenir.',
+    title: 'health.goal_3_title',
+    description: 'health.goal_3_desc',
     baseDuration: Duration(hours: 48),
   ),
   HealthGoal(
-    title: 'Rahat Nefes Alınır',
-    description: 'Akciğer kapasitesi artar ve solunum yolları gevşer. Nefes darlığı azalır.',
+    title: 'health.goal_4_title',
+    description: 'health.goal_4_desc',
     baseDuration: Duration(hours: 72),
   ),
   HealthGoal(
-    title: 'Kan Dolaşımı İyileşir',
-    description: 'Kan dolaşımı ve akciğer fonksiyonları %30 oranında artış gösterir.',
+    title: 'health.goal_5_title',
+    description: 'health.goal_5_desc',
     baseDuration: Duration(days: 14),
   ),
   HealthGoal(
-    title: 'Hastalık Riski Yarıya İner',
-    description: 'Koroner kalp hastalığı riski, sigara içen birine göre yarı yarıya düşer.',
+    title: 'health.goal_6_title',
+    description: 'health.goal_6_desc',
     baseDuration: Duration(days: 365),
   ),
   HealthGoal(
-    title: 'Felç Riski Sıfırlanır',
-    description: '5-15 yıl içinde felç geçirme riski, hiç sigara içmemiş birinin seviyesine iner.',
+    title: 'health.goal_7_title',
+    description: 'health.goal_7_desc',
     baseDuration: Duration(days: 1825), // 5 Yıl
   ),
   HealthGoal(
-    title: 'Akciğer Kanseri Riski',
-    description: 'Akciğer kanserinden ölme riski, hala içen birine göre yarı yarıya azalır.',
+    title: 'health.goal_8_title',
+    description: 'health.goal_8_desc',
     baseDuration: Duration(days: 3650), // 10 Yıl
   ),
   HealthGoal(
-    title: 'Tam İyileşme',
-    description: 'Kalp hastalığı riski, artık hiç içmemiş birinin riskiyle aynı seviyeye gelir.',
+    title: 'health.goal_9_title',
+    description: 'health.goal_9_desc',
     baseDuration: Duration(days: 5475), // 15 Yıl
   ),
 ];

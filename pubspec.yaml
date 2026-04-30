@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.3+4
 
 environment:
   sdk: ^3.7.2
@@ -42,6 +42,12 @@ dependencies:
   google_mobile_ads: ^6.0.0
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
+  easy_localization: ^3.0.8
+  in_app_review: ^2.0.11
+  package_info_plus: ^8.2.1
+  firebase_messaging: ^16.2.0
+  app_tracking_transparency: ^2.0.6+1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +71,7 @@ flutter:
   # the material Icons class.
   assets:
     - shorebird.yaml
+    - assets/translations/
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

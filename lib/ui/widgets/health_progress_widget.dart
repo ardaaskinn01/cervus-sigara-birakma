@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../models/health_goal.dart';
 
 class HealthProgressWidget extends StatelessWidget {
@@ -58,7 +59,7 @@ class HealthProgressWidget extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    goal.title,
+                    goal.title.tr(),
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 17,
@@ -87,7 +88,7 @@ class HealthProgressWidget extends StatelessWidget {
             const SizedBox(height: 12),
             // Orta Kısım: Açıklama
             Text(
-              goal.description,
+              goal.description.tr(),
               style: TextStyle(
                 color: isCompleted ? Colors.grey.shade700 : Colors.grey.shade500,
                 fontSize: 13,
@@ -113,7 +114,7 @@ class HealthProgressWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isCompleted ? 'Hedefe Ulaşıldı 🎉' : 'Hedef: ${_formatDuration(adjustedTarget)}',
+                  isCompleted ? 'health.goal_completed'.tr() : 'health.target_label'.tr(args: [_formatDuration(adjustedTarget)]),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -130,9 +131,9 @@ class HealthProgressWidget extends StatelessWidget {
   }
 
   String _formatDuration(Duration d) {
-    if (d.inDays >= 365) return '${d.inDays ~/ 365} YIL';
-    if (d.inDays > 0) return '${d.inDays} GÜN';
-    if (d.inHours > 0) return '${d.inHours} SAAT';
-    return '${d.inMinutes} DAKİKA';
+    if (d.inDays >= 365) return '${d.inDays ~/ 365} ${'common.year'.tr()}';
+    if (d.inDays > 0) return '${d.inDays} ${'common.day'.tr()}';
+    if (d.inHours > 0) return '${d.inHours} ${'common.hour'.tr()}';
+    return '${d.inMinutes} ${'common.minute'.tr()}';
   }
 }

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../services/notification_service.dart';
+import '../../services/ad_service.dart';
 import '../../providers/database_provider.dart';
 import '../../firebase_options.dart';
 import 'onboarding_view.dart';
 import 'main_view.dart';
+import '../widgets/privacy_policy_sheet.dart';
 import 'dart:async';
 
 /// ==========================================
@@ -78,9 +81,14 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
       debugPrint('🔔 Bildirimler başlatılıyor...');
       await NotificationService().init();
 
-      debugPrint('🗄️ Veritabanı başlatılıyor...');
       final db = ref.read(databaseProvider);
       await db.init();
+
+      // 4. Giriş Kaydı (Analytics için alt koleksiyon dökümanı oluştur)
+      if (db.isRegistered) {
+        debugPrint('📊 Giriş kaydı atılıyor...');
+        db.logAppEntry(); // Beklemesine gerek yok, arka planda gidebilir.
+      }
 
       // Kullanıcı kayıtlıysa ve bildirimler açıksa, bildirimleri her açılışta tazeleyelim
       if (db.isRegistered && db.notificationsEnabled) {
@@ -89,8 +97,11 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
       }
 
       debugPrint('💰 AdMob başlatılıyor...');
-      // initialize() zaten güvenli, ama beklemeden devam ediyoruz
-      MobileAds.instance.initialize();
+      // hem ATT hem AdMob'u başlatır
+      AdService.init(); 
+      
+      // Isterseniz geçiş reklamlarını önceden yükleyebilirsiniz
+      AdService.loadInterstitialAd();
 
       // İşlemler biter bitmez yönlendir (Timer'ı bekleme, akıcı bir geçiş için ekstra beklet)
       if (mounted && !_isNavigated) {
@@ -103,13 +114,14 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
     }
   }
 
-  void _navigateToNext() {
+  void _navigateToNext() async {
     if (_isNavigated) return;
-    _isNavigated = true;
 
-    // Database provider'ı _startInitialization içinde init() yapmıştık.
     final db = ref.read(databaseProvider);
+    _isNavigated = true;
     final bool isRegistered = db.isRegistered;
+
+    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
@@ -163,9 +175,9 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
                   child: const Icon(Icons.eco_rounded, size: 100, color: Colors.white), // Logo ikonu
                 ),
                 const SizedBox(height: 30),
-                const Text(
-                  'CERVUS',
-                  style: TextStyle(
+                Text(
+                  'splash.title'.tr(),
+                  style: const TextStyle(
                     fontSize: 42, 
                     fontWeight: FontWeight.w900, 
                     letterSpacing: 8, 
@@ -174,7 +186,7 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'YENİDEN DOĞUŞ',
+                  'splash.subtitle'.tr(),
                   style: TextStyle(
                     fontSize: 14, 
                     fontWeight: FontWeight.w600, 
