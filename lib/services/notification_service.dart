@@ -246,7 +246,7 @@ class NotificationService {
           currentMorning['body'].toString(),
           _nextInstanceOfTime(9, 30).add(Duration(days: i)),
           details,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
         
         // Akşam 20:30 Bildirimi
@@ -257,7 +257,7 @@ class NotificationService {
           currentEvening['body'].toString(),
           _nextInstanceOfTime(20, 30).add(Duration(days: i)),
           details,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
     }
   }

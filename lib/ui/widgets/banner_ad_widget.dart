@@ -56,7 +56,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         child: AdWidget(ad: _bannerAd!),
       );
     }
-    // Boşluk tutucu eğer reklam yüklenmiyorsa (örn: simulator hatası)
-    return const SizedBox(height: 50, child: Center(child: Text('Reklam Alanı', style: TextStyle(color: Colors.black12)))); 
+    return const SizedBox(height: 50); 
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -254,6 +255,27 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       ),
                       title: const Text('profile.privacy_policy', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
                       trailing: const Icon(Icons.open_in_new_rounded, color: AppColors.secondaryText, size: 20),
+                    ),
+                    const Divider(color: AppColors.border, height: 1, indent: 70, endIndent: 24),
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      onTap: () async {
+                        final url = Uri.parse(
+                          Platform.isIOS 
+                            ? 'https://apps.apple.com/tr/developer/cervus-digital/id1889669486'
+                            : 'https://play.google.com/store/apps/developer?id=Cervus+App+Studio'
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.apps_rounded, color: Color(0xFF64748B)),
+                      ),
+                      title: const Text('profile.other_apps', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))).tr(),
+                      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText),
                     ),
                   ],
                 ),
