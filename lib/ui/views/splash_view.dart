@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/notification_service.dart';
+import '../../services/dashboard_service.dart';
 import '../../services/ad_service.dart';
 import '../../providers/database_provider.dart';
 import '../../firebase_options.dart';
@@ -89,6 +90,14 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
       if (db.isRegistered) {
         debugPrint('📊 Giriş kaydı atılıyor...');
         db.logAppEntry(); // Beklemesine gerek yok, arka planda gidebilir.
+
+        // --- Dashboard Sync (Eski kullanıcıları Dashboard projesine taşı) ---
+        final String? userId = db.currentFirebaseId;
+        final Map<dynamic, dynamic>? userData = db.localUserData;
+        if (userId != null && userData != null) {
+          DashboardService().syncExistingUser(userId, userData);
+        }
+        // ------------------------------------------------------------------
       }
 
       // Kullanıcı kayıtlıysa ve bildirimler açıksa, bildirimleri her açılışta tazeleyelim

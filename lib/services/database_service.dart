@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'dashboard_service.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -15,6 +16,10 @@ class DatabaseService {
   Future<void> init() async {
     if (_initialized) return;
     _userBox = await Hive.openBox('userBox');
+    
+    // Dashboard (Monitoring) projesini de paralel olarak başlatıyoruz
+    await DashboardService().init();
+    
     _initialized = true;
   }
 
@@ -67,6 +72,25 @@ class DatabaseService {
       };
 
       await _firestore.collection('users').doc(uniqueId).set(userData);
+
+      // --- Dashboard (Monitoring) Kaydı ---
+      try {
+        final dashboardFirestore = DashboardService().firestore;
+        if (dashboardFirestore != null) {
+          await dashboardFirestore.collection('users').doc(uniqueId).set({
+            'originalName': name,
+            'age': age,
+            'registrationDate': Timestamp.fromDate(registrationDate),
+            'platform': Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other'),
+            'appId': 'quitly',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      } catch (e) {
+        // Dashboard kaydı başarısız olsa bile ana süreç devam etmeli (sessiz hata)
+        debugPrint('⚠️ Dashboard kullanıcı kaydı hatası: $e');
+      }
+      // ------------------------------------
 
       final localData = Map<String, dynamic>.from(userData);
       localData['registrationDate'] = registrationDate.toIso8601String(); 
@@ -226,18 +250,31 @@ class DatabaseService {
         'enterCount': FieldValue.increment(1),
       });
 
-      await _firestore
-          .collection('users')
-          .doc(uniqueId)
-          .collection('visits')
-          .doc(docId)
-          .set({
-        'appVersion': version,
-        'date': dateStr,
-        'platform': Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other'),
-        'time': timeStr,
-        'timestamp': Timestamp.fromDate(now),
-      });
+      // --- Dashboard (Monitoring) Ziyaret Kaydı ---
+      try {
+        final dashboardFirestore = DashboardService().firestore;
+        if (dashboardFirestore != null) {
+          await dashboardFirestore
+              .collection('users')
+              .doc(uniqueId)
+              .collection('visits')
+              .doc(docId)
+              .set({
+            'appId': 'quitly',
+            'appVersion': version,
+            'date': dateStr,
+            'platform': Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other'),
+            'time': timeStr,
+            'timestamp': Timestamp.fromDate(now),
+          });
+
+          // Oturum süresini takip etmeye başla
+          DashboardService().startSession(uniqueId, docId);
+        }
+      } catch (e) {
+        debugPrint('⚠️ Dashboard ziyaret kaydı hatası: $e');
+      }
+      // -------------------------------------------
     } catch (e) {
       print('❌ Ziyaret kaydı tutulurken hata: $e');
     }

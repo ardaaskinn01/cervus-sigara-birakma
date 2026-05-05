@@ -55,7 +55,7 @@ class _MainViewState extends State<MainView> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: Container(
-                  padding: EdgeInsets.zero,
+                  height: 62, // Menü yüksekliğini basık tutmak için sabitledik
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.85),
                     borderRadius: BorderRadius.circular(32),
@@ -64,30 +64,34 @@ class _MainViewState extends State<MainView> {
                       width: 1.5,
                     ),
                   ),
-                  child: BottomNavigationBar(
-                    elevation: 0,
-                    backgroundColor: Colors.transparent,
-                    currentIndex: _currentIndex,
-                    onTap: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                    selectedItemColor: const Color(0xFF2E7D32),
-                    unselectedItemColor: Colors.grey.shade400,
-                    showSelectedLabels: true,
-                    showUnselectedLabels: false,
-                    type: BottomNavigationBarType.fixed,
-                    selectedLabelStyle: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 11,
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeBottom: true,
+                    child: BottomNavigationBar(
+                      elevation: 0,
+                      backgroundColor: Colors.transparent,
+                      currentIndex: _currentIndex,
+                      onTap: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                      selectedItemColor: const Color(0xFF2E7D32),
+                      unselectedItemColor: Colors.grey.shade400,
+                      showSelectedLabels: true,
+                      showUnselectedLabels: false,
+                      type: BottomNavigationBarType.fixed,
+                      selectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                      fontSize: 10,
                       letterSpacing: 0.2,
+                      ),
+                      items: [
+                        _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
+                        _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
+                        _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 2),
+                      ],
                     ),
-                    items: [
-                      _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
-                      _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
-                      _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 2),
-                    ],
                   ),
                 ),
               ),
