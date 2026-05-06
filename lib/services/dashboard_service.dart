@@ -1,18 +1,22 @@
 import 'dart:io';
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
+/// 🚀 DASHBOARD SERVICE (ULTRA-SAFE REST EDITION)
+/// Bu servis ikincil Firebase projesine Flutter SDK (native) üzerinden DEĞİL,
+/// doğrudan Google Cloud REST API üzerinden erişir. 
+/// Bu sayede iOS tarafındaki "Multiple Firebase App" çakışması ve çökme (Abort Trap 6) 
+/// riski fiziksel olarak imkansız hale getirilmiştir.
 class DashboardService with WidgetsBindingObserver {
   static final DashboardService _instance = DashboardService._internal();
   factory DashboardService() => _instance;
   DashboardService._internal();
 
-  FirebaseApp? _dashboardApp;
-  FirebaseFirestore? _firestore;
   bool _isInitialized = false;
-
+  final String _projectId = "dashboard-baf3f";
+  
   // Oturum takibi değişkenleri
   DateTime? _sessionStartTime;
   String? _currentUserId;
@@ -22,49 +26,17 @@ class DashboardService with WidgetsBindingObserver {
 
   Future<void> init() async {
     if (_isInitialized) return;
-
-    // Ana Firebase'in (Default) ve UI'ın rahatlaması için 2 saniye bekleyelim
+    
+    // Gecikmeli başlatma (UI'ı yormamak için)
     await Future.delayed(const Duration(seconds: 2));
-
-    try {
-      // 🎯 YENİ PROJE BİLGİLERİ (dashboard-baf3f)
-      _dashboardApp = Firebase.apps.any((app) => app.name == 'dashboard')
-          ? Firebase.app('dashboard')
-          : await Firebase.initializeApp(
-              name: 'dashboard',
-              options: const FirebaseOptions(
-                apiKey: "AIzaSyBPOS5L2Qdoi0kVXgyQnCoWuAdbUfh_YAo",
-                authDomain: "dashboard-baf3f.firebaseapp.com",
-                projectId: "dashboard-baf3f",
-                storageBucket: "dashboard-baf3f.firebasestorage.app",
-                messagingSenderId: "607527844560",
-                appId: "1:607527844560:web:2415525d9fa986fdc03cd5", // Web/Universal ID
-                measurementId: "G-5CN9G1FZ0B",
-              ),
-            );
-
-      _firestore = FirebaseFirestore.instanceFor(app: _dashboardApp!);
-      _isInitialized = true;
-      
-      if (WidgetsBinding.instance.lifecycleState != null) {
-        WidgetsBinding.instance.addObserver(this);
-      } else {
-        // Observers only work when the binding is fully set up
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          WidgetsBinding.instance.addObserver(this);
-        });
-      }
-      
-      debugPrint('✅ Merkezi Dashboard Projesi Bağlandı (ID: dashboard-baf3f)');
-    } catch (e) {
-      debugPrint('❌ Dashboard Başlatma Hatası: $e');
-    }
+    
+    _isInitialized = true;
+    WidgetsBinding.instance.addObserver(this);
+    debugPrint('✅ Dashboard REST API Servisi Hazır (ID: $_projectId)');
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_isInitialized) return;
-
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       _stopHeartbeat();
       _updateCurrentSessionDuration();
@@ -94,8 +66,9 @@ class DashboardService with WidgetsBindingObserver {
     _heartbeatTimer = null;
   }
 
+  /// Firestore REST API üzerinden veri günceller
   Future<void> _updateCurrentSessionDuration() async {
-    if (_sessionStartTime == null || _currentUserId == null || _currentVisitId == null) return;
+    if (_currentUserId == null || _currentVisitId == null || _sessionStartTime == null) return;
 
     final now = DateTime.now();
     final int elapsedSeconds = now.difference(_sessionStartTime!).inSeconds;
@@ -105,47 +78,81 @@ class DashboardService with WidgetsBindingObserver {
       _sessionStartTime = now;
     }
 
+    final String url = "https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/users/$_currentUserId/visits/$_currentVisitId?updateMask.fieldPaths=durationSeconds&updateMask.fieldPaths=lastUpdate";
+
     try {
-      await _firestore!
-          .collection('users')
-          .doc(_currentUserId)
-          .collection('visits')
-          .doc(_currentVisitId)
-          .update({
-        'durationSeconds': _totalSecondsThisSession,
-        'lastUpdate': FieldValue.serverTimestamp(),
-      });
+      await http.patch(
+        Uri.parse(url),
+        body: jsonEncode({
+          "fields": {
+            "durationSeconds": {"integerValue": _totalSecondsThisSession.toString()},
+            "lastUpdate": {"timestampValue": DateTime.now().toUtc().toIso8601String()}
+          }
+        }),
+      );
     } catch (e) {
-      debugPrint('⚠️ Süre Kaydı Hatası: $e');
+      debugPrint('⚠️ REST Süre Kaydı Hatası: $e');
     }
   }
 
-  FirebaseFirestore? get firestore => _firestore;
-  bool get isInitialized => _isInitialized;
-
-  // SYNC METODU (Eski kullanıcıları çekmek için)
+  /// Firestore REST API üzerinden kullanıcı senkronizasyonu yapar
   Future<void> syncExistingUser(String userId, Map<dynamic, dynamic> userData) async {
-    if (!_isInitialized || _firestore == null) return;
     try {
-      final userDoc = await _firestore!.collection('users').doc(userId).get();
-      if (!userDoc.exists) {
-        await _firestore!.collection('users').doc(userId).set({
-          'originalName': userData['originalName'],
-          'age': userData['age'],
-          'registrationDate': userData['registrationDate'] is String 
-              ? Timestamp.fromDate(DateTime.parse(userData['registrationDate']))
-              : userData['registrationDate'],
-          'platform': Platform.isIOS ? 'iOS' : 'Android',
-          'appId': 'quitly', // 👈 Diğer uygulamalarda burayı 'alarmly' vb. değiştirin
-          'isMigrated': true,
-          'migratedAt': FieldValue.serverTimestamp(),
-          'createdAt': userData['registrationDate'] is String 
-              ? Timestamp.fromDate(DateTime.parse(userData['registrationDate']))
-              : userData['registrationDate'],
-        });
+      final String url = "https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/users/$userId";
+      
+      // Önce kullanıcının varlığını kontrol et
+      final response = await http.get(Uri.parse(url));
+      
+      if (response.statusCode == 404) {
+        // Kullanıcı yoksa oluştur
+        await http.patch(
+          Uri.parse(url),
+          body: jsonEncode({
+            "fields": {
+              "originalName": {"stringValue": userData['originalName'] ?? ""},
+              "age": {"stringValue": userData['age']?.toString() ?? ""},
+              "platform": {"stringValue": Platform.isIOS ? 'iOS' : 'Android'},
+              "appId": {"stringValue": 'quitly'},
+              "isMigrated": {"booleanValue": true},
+              "migratedAt": {"timestampValue": DateTime.now().toUtc().toIso8601String()},
+              "createdAt": {"timestampValue": DateTime.now().toUtc().toIso8601String()},
+            }
+          }),
+        );
+        debugPrint('✅ Yeni kullanıcı Dashboard REST API ile kaydedildi.');
       }
     } catch (e) {
-      debugPrint('⚠️ Sync Hatası: $e');
+      debugPrint('⚠️ REST Sync Hatası: $e');
+    }
+  }
+
+  /// Dashboard projesine doğrudan ziyaret kaydı atar
+  Future<void> logVisit({
+    required String userId,
+    required String visitId,
+    required String appVersion,
+    required String platform,
+    required String time,
+    required String date,
+  }) async {
+    final String url = "https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/users/$userId/visits/$visitId";
+
+    try {
+      await http.patch(
+        Uri.parse(url),
+        body: jsonEncode({
+          "fields": {
+            "appVersion": {"stringValue": appVersion},
+            "platform": {"stringValue": platform},
+            "time": {"stringValue": time},
+            "date": {"stringValue": date},
+            "appId": {"stringValue": 'quitly'},
+            "timestamp": {"timestampValue": DateTime.now().toUtc().toIso8601String()},
+          }
+        }),
+      );
+    } catch (e) {
+      debugPrint('⚠️ REST Visit Log Hatası: $e');
     }
   }
 }

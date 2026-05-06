@@ -77,19 +77,12 @@ class DatabaseService {
 
       // --- Dashboard (Monitoring) Kaydı ---
       try {
-        final dashboardFirestore = DashboardService().firestore;
-        if (dashboardFirestore != null) {
-          await dashboardFirestore.collection('users').doc(uniqueId).set({
-            'originalName': name,
-            'age': age,
-            'registrationDate': Timestamp.fromDate(registrationDate),
-            'platform': Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other'),
-            'appId': 'quitly',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-        }
+        await DashboardService().syncExistingUser(uniqueId, {
+          'originalName': name,
+          'age': age,
+          'registrationDate': registrationDate.toIso8601String(),
+        });
       } catch (e) {
-        // Dashboard kaydı başarısız olsa bile ana süreç devam etmeli (sessiz hata)
         debugPrint('⚠️ Dashboard kullanıcı kaydı hatası: $e');
       }
       // ------------------------------------
@@ -267,25 +260,17 @@ class DatabaseService {
 
       // --- Dashboard (Monitoring) Ziyaret Kaydı ---
       try {
-        final dashboardFirestore = DashboardService().firestore;
-        if (dashboardFirestore != null) {
-          await dashboardFirestore
-              .collection('users')
-              .doc(uniqueId)
-              .collection('visits')
-              .doc(docId)
-              .set({
-            'appId': 'quitly',
-            'appVersion': version,
-            'date': dateStr,
-            'platform': Platform.isIOS ? 'iOS' : (Platform.isAndroid ? 'Android' : 'Other'),
-            'time': timeStr,
-            'timestamp': Timestamp.fromDate(now),
-          });
+        await DashboardService().logVisit(
+          userId: uniqueId,
+          visitId: docId,
+          appVersion: version,
+          platform: Platform.isIOS ? 'iOS' : 'Android',
+          time: timeStr,
+          date: dateStr,
+        );
 
-          // Oturum süresini takip etmeye başla
-          DashboardService().startSession(uniqueId, docId);
-        }
+        // Oturum süresi takibini başlat
+        DashboardService().startSession(uniqueId, docId);
       } catch (e) {
         debugPrint('⚠️ Dashboard ziyaret kaydı hatası: $e');
       }
