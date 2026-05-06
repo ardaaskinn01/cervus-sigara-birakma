@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +18,13 @@ class DashboardService with WidgetsBindingObserver {
   String? _currentUserId;
   String? _currentVisitId;
   int _totalSecondsThisSession = 0;
+  Timer? _heartbeatTimer;
 
   Future<void> init() async {
     if (_isInitialized) return;
+
+    // Ana Firebase'in (Default) ve UI'ın rahatlaması için 2 saniye bekleyelim
+    await Future.delayed(const Duration(seconds: 2));
 
     try {
       // 🎯 YENİ PROJE BİLGİLERİ (dashboard-baf3f)
@@ -61,9 +66,11 @@ class DashboardService with WidgetsBindingObserver {
     if (!_isInitialized) return;
 
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _stopHeartbeat();
       _updateCurrentSessionDuration();
     } else if (state == AppLifecycleState.resumed) {
       _sessionStartTime = DateTime.now();
+      _startHeartbeat();
     }
   }
 
@@ -72,6 +79,19 @@ class DashboardService with WidgetsBindingObserver {
     _currentVisitId = visitId;
     _sessionStartTime = DateTime.now();
     _totalSecondsThisSession = 0;
+    _startHeartbeat();
+  }
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      _updateCurrentSessionDuration();
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
   }
 
   Future<void> _updateCurrentSessionDuration() async {
@@ -79,8 +99,11 @@ class DashboardService with WidgetsBindingObserver {
 
     final now = DateTime.now();
     final int elapsedSeconds = now.difference(_sessionStartTime!).inSeconds;
-    _totalSecondsThisSession += elapsedSeconds;
-    _sessionStartTime = now;
+    
+    if (elapsedSeconds > 0) {
+      _totalSecondsThisSession += elapsedSeconds;
+      _sessionStartTime = now;
+    }
 
     try {
       await _firestore!

@@ -13,6 +13,9 @@ import 'onboarding_view.dart';
 import 'main_view.dart';
 import '../widgets/privacy_policy_sheet.dart';
 import 'dart:async';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// ==========================================
 /// 🚀 ULTRA-SAFE SPLASH SCREEN (ZIRHLI MOD)
@@ -59,45 +62,54 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
   }
 
   void _startInitialization() async {
-    // 1. Ekranın çizilmesi için bekle (Hemen başlar başlamaz çizim yapılır)
+    // 1. Ekranın çizilmesi için bekle
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // 2. Maksimum bekleme süresi koy (Eğer her şey kilitlenirse bile 6 saniye sonra ana ekrana fırlat)
-    Timer(const Duration(seconds: 6), () {
+    // 2. Maksimum bekleme süresi
+    Timer(const Duration(seconds: 10), () {
       if (mounted && !_isNavigated) {
-        debugPrint('⏰ SPLASH TIMEOUT: Servisler bitmeden gidiyoruz.');
         _navigateToNext();
       }
     });
 
     try {
-      // 3. Arka Plan Servisleri
-      debugPrint('🔥 Firebase başlatılıyor...');
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-        debugPrint('🔥 Firebase başarıyla başlatıldı.');
-      } else {
-        debugPrint('🔥 Firebase zaten başlatılmış, atlanıyor.');
       }
 
       final db = ref.read(databaseProvider);
       await db.init();
 
+      // --- GÜNCELLEME KONTROLÜ ---
+      try {
+        final config = await db.getRemoteConfig();
+        if (config != null && mounted) {
+          final int remoteBuildNumber = int.tryParse(config['buildNumber']?.toString() ?? '0') ?? 0;
+          final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+          final int localBuildNumber = int.tryParse(packageInfo.buildNumber) ?? 0;
+
+          if (remoteBuildNumber > localBuildNumber) {
+            await _showUpdateDialog(
+              iosUrl: config['iosUrl'] ?? '',
+              androidUrl: config['androidUrl'] ?? '',
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Güncelleme kontrolü hatası: $e');
+      }
+      // --------------------------
+
       debugPrint('🔔 Bildirimler başlatılıyor...');
       await NotificationService().init();
 
-      // 4. Giriş Kaydı (Analytics için alt koleksiyon dökümanı oluştur)
       if (db.isRegistered) {
-        debugPrint('📊 Giriş kaydı atılıyor...');
-        db.logAppEntry(); // Beklemesine gerek yok, arka planda gidebilir.
-
-        // --- Dashboard Sync (Eski kullanıcıları Dashboard projesine taşı) ---
+        db.logAppEntry();
         final String? userId = db.currentFirebaseId;
         final Map<dynamic, dynamic>? userData = db.localUserData;
         if (userId != null && userData != null) {
           DashboardService().syncExistingUser(userId, userData);
         }
-        // ------------------------------------------------------------------
       }
 
       // Kullanıcı kayıtlıysa ve bildirimler açıksa, bildirimleri her açılışta tazeleyelim
@@ -232,6 +244,48 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
             ),
           ),
         ),
+      ),
+    );
+  }
+  Future<void> _showUpdateDialog({required String iosUrl, required String androidUrl}) async {
+    final String storeUrl = Platform.isIOS ? iosUrl : androidUrl;
+    
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Güncelleme Mevcut',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
+        ),
+        content: const Text(
+          'Uygulamanın daha yeni ve stabil bir versiyonu yayında. En iyi deneyim için lütfen güncelleyin.',
+          style: TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Güncelleme', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (storeUrl.isNotEmpty) {
+                final Uri url = Uri.parse(storeUrl);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Güncelle'),
+          ),
+        ],
       ),
     );
   }

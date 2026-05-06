@@ -18,8 +18,9 @@ class DatabaseService {
     if (_initialized) return;
     _userBox = await Hive.openBox('userBox');
     
-    // Dashboard (Monitoring) projesini de paralel olarak başlatıyoruz
-    await DashboardService().init();
+    // Dashboard (Monitoring) projesini arka planda başlatıyoruz (Non-blocking)
+    // await kaldırıldı çünkü açılışı kilitlememeli
+    DashboardService().init();
     
     _initialized = true;
   }
@@ -233,6 +234,19 @@ class DatabaseService {
   }
 
   Stream<void> get userChanges => _userBox.watch(key: 'userData');
+  
+  /// Firestore'dan dinamik uygulama ayarlarını ve güncelleme bilgilerini çeker
+  Future<Map<String, dynamic>?> getRemoteConfig() async {
+    try {
+      final doc = await _firestore.collection('settings').doc('app_config').get();
+      if (doc.exists) {
+        return doc.data();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Remote config çekilemedi: $e');
+    }
+    return null;
+  }
 
   Future<void> logAppEntry() async {
     try {
