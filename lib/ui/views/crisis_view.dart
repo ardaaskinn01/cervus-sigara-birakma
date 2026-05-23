@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
 import '../../providers/database_provider.dart';
+import '../../services/ad_service.dart';
 import '../app_colors.dart';
 
 class CrisisView extends ConsumerStatefulWidget {
@@ -59,16 +60,25 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
     final days = state.timeElapsed.inDays;
     final hours = state.timeElapsed.inHours.remainder(24);
 
-    return Scaffold(
-      backgroundColor: AppColors.breathBlue, // Fresh Blue for focus
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white, size: 30),
-          onPressed: () => Navigator.pop(context),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          final isPro = ref.read(databaseProvider).isPro;
+          if (!isPro) {
+            AdService.showInterstitialAd();
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.breathBlue, // Fresh Blue for focus
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white, size: 30),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
-      ),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -173,6 +183,6 @@ class _CrisisViewState extends ConsumerState<CrisisView> with SingleTickerProvid
           ],
         ),
       ),
-    );
+    ));
   }
 }

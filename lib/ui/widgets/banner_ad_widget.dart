@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../services/ad_service.dart';
+import '../../providers/database_provider.dart';
 
-class BannerAdWidget extends StatefulWidget {
-  const BannerAdWidget({super.key});
+class BannerAdWidget extends ConsumerStatefulWidget {
+  final int screenIndex;
+  const BannerAdWidget({super.key, this.screenIndex = 0});
 
   @override
-  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+  ConsumerState<BannerAdWidget> createState() => _BannerAdWidgetState();
 }
 
-class _BannerAdWidgetState extends State<BannerAdWidget> {
+class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
@@ -20,8 +23,10 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 
   void _loadAd() {
+    if (ref.read(databaseProvider).isPro) return;
+
     _bannerAd = BannerAd(
-      adUnitId: AdService.bannerAdUnitId,
+      adUnitId: AdService.getBannerAdUnitId(widget.screenIndex),
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
@@ -48,6 +53,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (ref.watch(databaseProvider).isPro) return const SizedBox.shrink();
+
     if (_isAdLoaded && _bannerAd != null) {
       return Container(
         color: Colors.transparent,
@@ -56,6 +63,6 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         child: AdWidget(ad: _bannerAd!),
       );
     }
-    return const SizedBox(height: 50); 
+    return const SizedBox.shrink(); 
   }
 }

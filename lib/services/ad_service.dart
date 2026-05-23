@@ -22,12 +22,29 @@ class AdService {
   }
 
   // Banner Reklam Unit ID'leri
-  static String get bannerAdUnitId {
+  // Banner Reklam Unit ID'leri - Sayfa bazlı
+  static String getBannerAdUnitId(int screenIndex) {
     if (isProduction) {
       if (Platform.isIOS) {
-        return 'ca-app-pub-2073707860224174/8103519209'; 
+        switch (screenIndex) {
+          case 1: // İyileşme (Health)
+            return 'ca-app-pub-2073707860224174/1786129070';
+          case 2: // Profil (Profile)
+            return 'ca-app-pub-2073707860224174/1164523995';
+          case 0: // Dashboard
+          default:
+            return 'ca-app-pub-2073707860224174/8103519209';
+        }
       } else if (Platform.isAndroid) {
-        return 'ca-app-pub-2073707860224174/4185378931';
+        switch (screenIndex) {
+          case 1: // İyileşme (Health)
+            return 'ca-app-pub-2073707860224174/7038455754';
+          case 2: // Profil (Profile)
+            return 'ca-app-pub-2073707860224174/4640734579';
+          case 0: // Dashboard
+          default:
+            return 'ca-app-pub-2073707860224174/4185378931';
+        }
       }
     } else {
       // Test ID'leri
@@ -44,9 +61,9 @@ class AdService {
   static String get interstitialAdUnitId {
     if (isProduction) {
       if (Platform.isIOS) {
-        return 'ca-app-pub-0000000000000000/0000000000'; // Henüz verilmediyse boş kalabilir.
+        return 'ca-app-pub-2073707860224174/2195290206'; 
       } else if (Platform.isAndroid) {
-        return 'ca-app-pub-0000000000000000/0000000000';
+        return 'ca-app-pub-2073707860224174/2773874702';
       }
     } else {
       // Test ID'leri

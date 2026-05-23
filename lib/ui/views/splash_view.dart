@@ -14,8 +14,6 @@ import 'main_view.dart';
 import '../widgets/privacy_policy_sheet.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 /// ==========================================
 /// 🚀 ULTRA-SAFE SPLASH SCREEN (ZIRHLI MOD)
@@ -44,7 +42,7 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1500),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -80,54 +78,16 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
       final db = ref.read(databaseProvider);
       await db.init();
 
-      // --- GÜNCELLEME KONTROLÜ ---
-      try {
-        final config = await db.getRemoteConfig();
-        if (config != null && mounted) {
-          final int remoteBuildNumber = int.tryParse(config['buildNumber']?.toString() ?? '0') ?? 0;
-          final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-          final int localBuildNumber = int.tryParse(packageInfo.buildNumber) ?? 0;
-
-          if (remoteBuildNumber > localBuildNumber) {
-            await _showUpdateDialog(
-              iosUrl: config['iosUrl'] ?? '',
-              androidUrl: config['androidUrl'] ?? '',
-            );
-          }
-        }
-      } catch (e) {
-        debugPrint('⚠️ Güncelleme kontrolü hatası: $e');
-      }
-      // --------------------------
-
       debugPrint('🔔 Bildirimler başlatılıyor...');
       await NotificationService().init();
 
-      if (db.isRegistered) {
-        db.logAppEntry();
-        final String? userId = db.currentFirebaseId;
-        final Map<dynamic, dynamic>? userData = db.localUserData;
-        if (userId != null && userData != null) {
-          DashboardService().syncExistingUser(userId, userData);
-        }
-      }
-
-      // Kullanıcı kayıtlıysa ve bildirimler açıksa, bildirimleri her açılışta tazeleyelim
-      if (db.isRegistered && db.notificationsEnabled) {
-        debugPrint('🔔 Bildirimler planlanıyor...');
-        await NotificationService().schedulePeriodicNotifications();
-      }
-
       debugPrint('💰 AdMob başlatılıyor...');
-      // hem ATT hem AdMob'u başlatır
       AdService.init(); 
-      
-      // Isterseniz geçiş reklamlarını önceden yükleyebilirsiniz
       AdService.loadInterstitialAd();
 
-      // İşlemler biter bitmez yönlendir (Timer'ı bekleme, akıcı bir geçiş için ekstra beklet)
+      // Faster navigation (~1.5s total including 500ms initial delay + service init)
       if (mounted && !_isNavigated) {
-        await Future.delayed(const Duration(milliseconds: 1500));
+        await Future.delayed(const Duration(milliseconds: 700));
         _navigateToNext();
       }
     } catch (e) {
@@ -244,48 +204,6 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
             ),
           ),
         ),
-      ),
-    );
-  }
-  Future<void> _showUpdateDialog({required String iosUrl, required String androidUrl}) async {
-    final String storeUrl = Platform.isIOS ? iosUrl : androidUrl;
-    
-    return showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Güncelleme Mevcut',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B)),
-        ),
-        content: const Text(
-          'Uygulamanın daha yeni ve stabil bir versiyonu yayında. En iyi deneyim için lütfen güncelleyin.',
-          style: TextStyle(color: Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Güncelleme', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (storeUrl.isNotEmpty) {
-                final Uri url = Uri.parse(storeUrl);
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text('Güncelle'),
-          ),
-        ],
       ),
     );
   }

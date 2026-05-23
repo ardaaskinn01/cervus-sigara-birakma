@@ -70,6 +70,7 @@ class DatabaseService {
         'packPrice': packPrice,
         'currency': currency,
         'registrationDate': Timestamp.fromDate(registrationDate),
+        'firstRegistrationDate': Timestamp.fromDate(registrationDate), // Added this
         'isPrivacyAccepted': true,
       };
 
@@ -89,6 +90,7 @@ class DatabaseService {
 
       final localData = Map<String, dynamic>.from(userData);
       localData['registrationDate'] = registrationDate.toIso8601String(); 
+      localData['firstRegistrationDate'] = registrationDate.toIso8601String(); // Added this
       
       await _userBox.put('userData', localData);
       await _userBox.put('firebaseId', uniqueId);
@@ -169,12 +171,28 @@ class DatabaseService {
 
   // Getters for Local Data
   bool get isRegistered => _userBox.get('isRegistered', defaultValue: false);
+  bool get isPro => _userBox.get('isPro', defaultValue: false);
   bool get isPrivacyAccepted => _userBox.get('isPrivacyAccepted', defaultValue: false);
   String? get currentFirebaseId => _userBox.get('firebaseId');
   Map<dynamic, dynamic>? get localUserData => _userBox.get('userData');
 
+  DateTime get firstRegistrationDate {
+    final data = localUserData;
+    if (data == null) return DateTime.now();
+    final dateStr = data['firstRegistrationDate'] ?? data['registrationDate'];
+    if (dateStr == null) return DateTime.now();
+    try {
+       if (dateStr is String) return DateTime.parse(dateStr);
+       if (dateStr is Timestamp) return dateStr.toDate();
+       return DateTime.now();
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
   // Setters
   Future<void> setPrivacyAccepted(bool value) async => _userBox.put('isPrivacyAccepted', value);
+  Future<void> setProStatus(bool value) async => _userBox.put('isPro', value);
 
   // Preferences
   bool get notificationsEnabled => _userBox.get('notificationsEnabled', defaultValue: true);

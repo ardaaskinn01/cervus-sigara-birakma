@@ -31,28 +31,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CalendarView()),
-              ),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 3)),
-                  ],
-                ),
-                child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF064E3B), size: 22),
-              ),
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: SafeArea(
         top: false,
@@ -128,17 +107,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF7ED), // Very light orange
+                            color: const Color(0xFFEFF6FF), // Light Blue 50
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFFFDBA74), width: 2), // Orange 300
+                            border: Border.all(color: const Color(0xFF93C5FD), width: 2), // Blue 300
                             boxShadow: [
-                              BoxShadow(color: const Color(0xFFF97316).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                              BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
                             ],
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.bolt_rounded, size: 32, color: Color(0xFFEA580C)), // Orange 600
+                              const Icon(Icons.bolt_rounded, size: 32, color: Color(0xFF2563EB)), // Blue 600
                               const SizedBox(height: 8),
                               Text(
                                 'crisis.title'.tr(),
@@ -146,7 +125,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14,
-                                  color: Color(0xFF9A3412), // Orange 800
+                                  color: Color(0xFF1E3A8A), // Blue 900
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -162,17 +141,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF2F2), // Very light red
+                            color: const Color(0xFFFFFBEB), // Amber 50
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFFFECACA), width: 2), // Red 200
+                            border: Border.all(color: const Color(0xFFFBBF24), width: 2), // Amber 400
                             boxShadow: [
-                              BoxShadow(color: const Color(0xFFEF4444).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+                              BoxShadow(color: const Color(0xFFF59E0B).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
                             ],
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.refresh_rounded, size: 32, color: Color(0xFFDC2626)), // Red 600
+                              const Icon(Icons.refresh_rounded, size: 32, color: Color(0xFF4B5563)), // Gray 600
                               const SizedBox(height: 8),
                               Text(
                                 'dashboard.reset_confirm'.tr(),
@@ -180,7 +159,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 14,
-                                  color: Color(0xFF991B1B), // Red 800
+                                  color: Colors.black, 
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -271,6 +250,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
+    final db = ref.read(databaseProvider);
+    final userData = db.localUserData;
+    final state = ref.read(dashboardViewModelProvider);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -288,16 +271,32 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           ),
           ElevatedButton(
             onPressed: () {
+              // Capture data for motivational text before resetting
+              final now = DateTime.now();
+              DateTime? oldRegDate;
+              if (userData != null && userData['registrationDate'] != null) {
+                try {
+                  oldRegDate = DateTime.parse(userData['registrationDate'].toString());
+                } catch (_) {}
+              }
+              
+              final days = state.timeElapsed.inDays;
+              
               ref.read(dashboardViewModelProvider.notifier).resetTimer();
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('dashboard.reset_success'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  backgroundColor: const Color(0xFF16A34A),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              );
+
+              if (oldRegDate != null) {
+                _showMotivationalDialog(context, days, oldRegDate, now);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('dashboard.reset_success'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    backgroundColor: const Color(0xFF16A34A),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFDC2626), // Red-600
@@ -307,6 +306,85 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
             child: Text('dashboard.reset_confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showMotivationalDialog(BuildContext context, int days, DateTime start, DateTime end) {
+    final startStr = DateFormat('d MMMM yyyy').format(start);
+    final endStr = DateFormat('d MMMM yyyy').format(end);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFBBF7D0), width: 2),
+                ),
+                child: const Icon(Icons.favorite_rounded, color: Color(0xFF22C55E), size: 40),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Pes Etme!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF064E3B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 16, color: Color(0xFF475569), height: 1.5),
+                  children: [
+                    TextSpan(text: '$startStr - $endStr', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                    const TextSpan(text: ' tarihleri arasında sigara içmeden '),
+                    TextSpan(text: '$days gün', style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF16A34A), fontSize: 18)),
+                    const TextSpan(text: ' sağlıklı yaşadın. Tekrar yapabilirsin hem de daha iyisini! Kendine güven, sağlıklı yaşa.'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF059669),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text(
+                    'Hazırım, Yeniden Başlayalım!',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

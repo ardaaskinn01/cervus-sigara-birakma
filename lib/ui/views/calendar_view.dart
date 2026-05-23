@@ -66,28 +66,61 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
 
   /// Returns color for a given day:
   /// Red (smoked) > Yellow (crisis) > Green (smoke-free) > Grey (future/before start)
-  Color? _dayColor(DateTime day, DateTime startDate) {
+  Color? _dayColor(DateTime day, DateTime firstStart) {
     if (day.isAfter(DateTime.now())) return null; // future
     final key = _dateKey(day);
     final dayOnly = DateTime(day.year, day.month, day.day);
-    final startOnly = DateTime(startDate.year, startDate.month, startDate.day);
-    if (dayOnly.isBefore(startOnly)) return null; // before quit date
+    final startOnly = DateTime(firstStart.year, firstStart.month, firstStart.day);
+    if (dayOnly.isBefore(startOnly)) return null; // before user started the app
 
     if (_smokedDays.contains(key)) return const Color(0xFFEF4444); // red
     if (_crisisDays.contains(key)) return const Color(0xFFF59E0B); // yellow
     return const Color(0xFF22C55E); // green (smoke-free)
   }
 
+  int _calculateMaxStreak(DateTime firstStart) {
+    DateTime start = DateTime(firstStart.year, firstStart.month, firstStart.day);
+    DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    
+    if (_smokedDays.isEmpty) {
+      return today.difference(start).inDays;
+    }
+    
+    List<DateTime> relapses = _smokedDays.map((d) {
+       final parts = d.split('-');
+       return DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+    }).toList();
+    relapses.sort();
+    
+    int maxDays = 0;
+    DateTime currentStart = start;
+    
+    for (var relapse in relapses) {
+      int streak = relapse.difference(currentStart).inDays;
+      if (streak > maxDays) maxDays = streak;
+      currentStart = relapse.add(const Duration(days: 1)); // New streak starts day after relapse
+    }
+    
+    int currentStreak = today.isBefore(currentStart) ? 0 : today.difference(currentStart).inDays;
+    if (currentStreak > maxDays) maxDays = currentStreak;
+    
+    return maxDays;
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(databaseProvider);
     final userData = db.localUserData;
-    DateTime startDate = DateTime.now();
+    final firstStart = db.firstRegistrationDate; // Use first start for history
+    
+    DateTime currentStartDate = DateTime.now();
     if (userData != null && userData['registrationDate'] != null) {
       try {
-        startDate = DateTime.parse(userData['registrationDate'].toString());
+        currentStartDate = DateTime.parse(userData['registrationDate'].toString());
       } catch (_) {}
     }
+
+    final maxStreak = _calculateMaxStreak(firstStart);
 
     final monthStart = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
     final monthEnd = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 0);
@@ -181,7 +214,7 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
                                 return const SizedBox.shrink();
                               }
                               final day = DateTime(_focusedMonth.year, _focusedMonth.month, dayNum);
-                              final color = _dayColor(day, startDate);
+                              final color = _dayColor(day, firstStart);
                               final isSelected = _selectedDay != null &&
                                   _selectedDay!.year == day.year &&
                                   _selectedDay!.month == day.month &&
@@ -193,7 +226,7 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
                               return GestureDetector(
                                 onTap: () {
                                   setState(() => _selectedDay = day);
-                                  _showDayDetail(context, day, startDate);
+                                  _showDayDetail(context, day, firstStart);
                                 },
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
@@ -241,9 +274,13 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
                     _buildLegend(),
                     const SizedBox(height: 20),
 
+                    // Record Card
+                    _buildRecordCard(maxStreak),
+                    const SizedBox(height: 20),
+
                     // Stats summary
-                    _buildMonthStats(monthEnd, startDate),
-                    const SizedBox(height: 32),
+                    _buildMonthStats(monthEnd, firstStart),
+                    const SizedBox(height: 154), // Spacing for BottomNavBar + Ad
                   ],
                 ),
               ),
@@ -334,6 +371,79 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
         const SizedBox(width: 6),
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
       ],
+    );
+  }
+
+  Widget _buildRecordCard(int maxStreak) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE0F2FE), // Very light blue
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF7DD3FC), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0EA5E9).withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF0EA5E9),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.emoji_events_rounded, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'En Uzun Sigarasız Süreç',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0369A1),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$maxStreak',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0C4A6E),
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 2.0),
+                      child: Text(
+                        'Gün',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0369A1),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

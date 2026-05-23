@@ -7,7 +7,9 @@ import '../../providers/language_provider.dart';
 import '../../services/notification_service.dart';
 import '../../services/review_service.dart';
 import '../../services/app_constants.dart';
+import '../../services/revenuecat_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../app_colors.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
@@ -102,8 +104,233 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     }
   }
 
+  void _showPremiumDialog() {
+    final isTr = context.locale.languageCode == 'tr';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.workspace_premium_rounded, size: 60, color: Color(0xFF10B981)),
+                const SizedBox(height: 12),
+                Text(
+                  isTr ? "Quitly Pro" : "Quitly Pro", 
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))
+                ),
+                const SizedBox(height: 20),
+                
+                // Özellikler
+                _buildPremiumFeatureRow(Icons.block, isTr ? 'Reklamları Tamamen Kaldır' : 'Remove All Ads'),
+                const SizedBox(height: 24),
+
+                // RevenueCat paketler
+                FutureBuilder<Offerings?>(
+                  future: RevenueCatService.getOfferings(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator()));
+                    }
+                    if (snapshot.hasError || snapshot.data == null) {
+                      return Text(isTr ? "Paketler yüklenemedi." : "Packages could not be loaded.", style: const TextStyle(color: Color(0xFF64748B)));
+                    }
+                    final packages = snapshot.data!.current?.availablePackages ?? [];
+                    final monthly  = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull 
+                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('monthly')).firstOrNull;
+                    final yearly   = packages.where((p) => p.packageType == PackageType.annual).firstOrNull 
+                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('year') || p.identifier.toLowerCase().contains('ann')).firstOrNull;
+                    final lifetime = packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull 
+                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('life') || p.identifier.toLowerCase().contains('pro')).firstOrNull;
+                    return Column(children: [
+                      if (monthly  != null) 
+                        _buildSubCard(
+                          package: monthly,
+                          title: isTr ? "Aylık" : "Monthly",
+                          price: monthly.storeProduct.priceString,
+                          subtitle: isTr ? "1 Aylık Abonelik" : "1 Month Subscription",
+                          isPopular: false,
+                          isTr: isTr,
+                        ),
+                      if (yearly   != null) 
+                        _buildSubCard(
+                          package: yearly,
+                          title: isTr ? "Yıllık" : "Yearly",
+                          price: yearly.storeProduct.priceString,
+                          subtitle: isTr ? "1 Yıllık Abonelik" : "1 Year Subscription",
+                          isPopular: true,
+                          originalPrice: yearly.storeProduct.currencyCode == 'TRY' ? "599.99 ₺" : "\$35.99",
+                          isTr: isTr,
+                        ),
+                      if (lifetime != null) 
+                        _buildSubCard(
+                          package: lifetime,
+                          title: isTr ? "Ömür Boyu" : "Lifetime",
+                          price: lifetime.storeProduct.priceString,
+                          subtitle: isTr ? "Tek seferlik ödeme" : "One-time payment",
+                          isPopular: false,
+                          isSpecialOffer: true,
+                          isTr: isTr,
+                        ),
+                    ]);
+                  },
+                ),
+
+                const SizedBox(height: 12),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+                      onPressed: () => launchUrl(Uri.parse(AppConstants.privacyPolicyUrl)),
+                      child: Text(isTr ? "Gizlilik Politikası" : "Privacy Policy", style: const TextStyle(color: Color(0xFF10B981), fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                    const Text("•", style: TextStyle(color: Color(0x4D64748B))),
+                    TextButton(
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+                      onPressed: () => launchUrl(Uri.parse("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")),
+                      child: Text(isTr ? "Kullanım Koşulları (EULA)" : "Terms of Use (EULA)", style: const TextStyle(color: Color(0xFF10B981), fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                TextButton(
+                  onPressed: () async { 
+                    Navigator.pop(ctx); 
+                    await RevenueCatService.restorePurchases(context, ref); 
+                  },
+                  child: Text(isTr ? 'Satın Alımları Geri Yükle' : 'Restore Purchases', style: const TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx), 
+                  child: Text(isTr ? 'İptal' : 'Cancel', style: TextStyle(color: const Color(0xFF64748B).withOpacity(0.6), fontWeight: FontWeight.w500))
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumFeatureRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: Color(0xFF10B981), size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(text, style: const TextStyle(color: Color(0xFF064E3B), fontSize: 15, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubCard({
+    required Package package,
+    required String title,
+    required String price,
+    required String subtitle,
+    required bool isPopular,
+    String? originalPrice,
+    bool isSpecialOffer = false,
+    required bool isTr,
+  }) {
+    return GestureDetector(
+      onTap: () async {
+        Navigator.pop(context);
+        await RevenueCatService.purchasePackage(context, ref, package);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isPopular ? const Color(0xFF10B981).withOpacity(0.1) : Colors.transparent,
+          border: Border.all(color: isPopular ? const Color(0xFF10B981) : Colors.grey.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(title, style: const TextStyle(color: Color(0xFF064E3B), fontSize: 16, fontWeight: FontWeight.bold)),
+                      if (isPopular) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: const Color(0xFF10B981), borderRadius: BorderRadius.circular(6)),
+                          child: Text(isTr ? "POPÜLER" : "POPULAR", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                      if (isSpecialOffer) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: Colors.orange.shade700, borderRadius: BorderRadius.circular(6)),
+                          child: Text(isTr ? "ÖZEL TEKLİF" : "SPECIAL OFFER", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                        ),
+                      ]
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (originalPrice != null)
+                  Text(
+                    originalPrice,
+                    style: TextStyle(
+                      color: const Color(0xFF64748B).withOpacity(0.6),
+                      fontSize: 13,
+                      decoration: TextDecoration.lineThrough,
+                      decorationColor: Colors.redAccent,
+                      decorationThickness: 2.0,
+                    ),
+                  ),
+                Text(
+                  price,
+                  style: const TextStyle(color: Color(0xFF059669), fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final db = ref.watch(databaseProvider);
+    final isPro = db.isPro;
+    final isTr = context.locale.languageCode == 'tr';
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -119,6 +346,101 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Premium Status Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: isPro
+                      ? const LinearGradient(
+                          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : const LinearGradient(
+                          colors: [Color(0xFFFDE047), Color(0xFFF59E0B)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isPro ? const Color(0xFF0F172A) : const Color(0xFFF59E0B)).withOpacity(0.25),
+                      blurRadius: 25,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        isPro ? Icons.auto_awesome_rounded : Icons.star_rounded, 
+                        color: isPro ? const Color(0xFFFDE047) : Colors.white, 
+                        size: 28
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
+                            style: TextStyle(
+                              color: isPro ? Colors.white : const Color(0xFF78350F), 
+                              fontWeight: FontWeight.w900,
+                              fontSize: 18,
+                              letterSpacing: -0.5
+                            )
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isPro ? (isTr ? 'Reklamsız deneyimin tadını çıkarın.' : 'Enjoy an ad-free experience.') : (isTr ? 'Reklamları tamamen kaldırmak için PRO\'ya geçin.' : 'Upgrade to PRO to remove all ads.'), 
+                            style: TextStyle(
+                              color: isPro ? Colors.white70 : const Color(0xFF92400E).withOpacity(0.8), 
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!isPro)
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _showPremiumDialog,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFFB45309),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text(
+                            isTr ? 'Geç' : 'Upgrade', 
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
               // Bilgi Güncelleme Segmenti
               Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
