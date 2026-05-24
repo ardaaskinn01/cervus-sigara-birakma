@@ -38,6 +38,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
       ),
       body: SafeArea(
         top: false,
+        bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 8.0, bottom: 12.0),

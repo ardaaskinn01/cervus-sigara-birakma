@@ -340,6 +340,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         elevation: 0,
       ),
       body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 120),

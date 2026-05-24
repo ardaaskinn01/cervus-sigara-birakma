@@ -43,6 +43,7 @@ class _HealthViewState extends ConsumerState<HealthView> {
         elevation: 0,
       ),
       body: SafeArea(
+        bottom: false,
         child: ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 120),
