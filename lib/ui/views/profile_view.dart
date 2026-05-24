@@ -390,7 +390,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
+                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : 'Quitly PRO', 
                             style: TextStyle(
                               color: isPro ? Colors.white : const Color(0xFF78350F), 
                               fontWeight: FontWeight.w900,

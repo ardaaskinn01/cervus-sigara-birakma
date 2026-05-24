@@ -29,7 +29,6 @@ class _MainViewState extends ConsumerState<MainView> {
   @override
   void initState() {
     super.initState();
-    // Initialize RevenueCat on startup
     WidgetsBinding.instance.addPostFrameCallback((_) {
       RevenueCatService.init(ref);
     });
@@ -39,78 +38,87 @@ class _MainViewState extends ConsumerState<MainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      extendBody: true,
-      body: _pages[_currentIndex],
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
+      extendBody: true, // İçeriğin tab bar altına sızmasını sağlar
+      body: Stack(
         children: [
-          BannerAdWidget(
-            key: ValueKey(_currentIndex),
-            screenIndex: _currentIndex,
-          ),
-          SafeArea(
-            child: Container(
-              margin: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 8,
-                bottom: MediaQuery.of(context).viewPadding.bottom > 0 ? 0 : 12,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          _pages[_currentIndex],
+          
+          // Navigasyon ve Reklam Katmanı
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BannerAdWidget(
+                  key: ValueKey(_currentIndex),
+                  screenIndex: _currentIndex,
+                ),
+                SafeArea(
+                  top: false,
                   child: Container(
-                    height: 72,
+                    margin: EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 8,
+                      bottom: MediaQuery.of(context).viewPadding.bottom > 0 ? 0 : 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                       border: Border.all(
                         color: Colors.white.withOpacity(0.6),
                         width: 1.5,
                       ),
                     ),
-                    child: BottomNavigationBar(
-                      elevation: 0,
-                      backgroundColor: Colors.transparent,
-                      currentIndex: _currentIndex,
-                      onTap: (index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      },
-                      selectedItemColor: const Color(0xFF2E7D32),
-                      unselectedItemColor: Colors.grey.shade400,
-                      showSelectedLabels: true,
-                      showUnselectedLabels: false,
-                      type: BottomNavigationBarType.fixed,
-                      iconSize: 22,
-                      selectedLabelStyle: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 10,
-                        height: 1.2,
-                        letterSpacing: 0.2,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                        child: SizedBox(
+                          height: 72,
+                          child: BottomNavigationBar(
+                            elevation: 0,
+                            backgroundColor: Colors.transparent,
+                            currentIndex: _currentIndex,
+                            onTap: (index) {
+                              setState(() {
+                                _currentIndex = index;
+                              });
+                            },
+                            selectedItemColor: const Color(0xFF2E7D32),
+                            unselectedItemColor: Colors.grey.shade400,
+                            showSelectedLabels: true,
+                            showUnselectedLabels: false,
+                            type: BottomNavigationBarType.fixed,
+                            iconSize: 22,
+                            selectedLabelStyle: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 10,
+                              height: 1.2,
+                              letterSpacing: 0.2,
+                            ),
+                            items: [
+                              _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
+                              _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
+                              _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'calendar.title'.tr() == 'calendar.title' ? (context.locale.languageCode == 'tr' ? 'Takvim' : 'Calendar') : 'calendar.title'.tr(), 2),
+                              _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 3),
+                            ],
+                          ),
+                        ),
                       ),
-                      items: [
-                        _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
-                        _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
-                        _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'calendar.title'.tr() == 'calendar.title' ? (context.locale.languageCode == 'tr' ? 'Takvim' : 'Calendar') : 'calendar.title'.tr(), 2),
-                        _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 3),
-                      ],
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
