@@ -373,6 +373,12 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 child: Row(
                   children: [
                     Container(
+                      margin: EdgeInsets.only(
+                        left: 24, 
+                        right: 24, 
+                        top: 8, 
+                        bottom: Platform.isIOS ? 0 : 12
+                      ),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
@@ -389,50 +395,48 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
-                            style: TextStyle(
-                              color: isPro ? Colors.white : const Color(0xFF78350F), 
-                              fontWeight: FontWeight.w900,
-                              fontSize: 18,
-                              letterSpacing: -0.5
-                            )
+                          Flexible(
+                            child: Text(
+                              isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
+                              style: TextStyle(
+                                color: isPro ? Colors.white : const Color(0xFF78350F), 
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                                letterSpacing: -0.5
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             isPro ? (isTr ? 'Reklamsız deneyimin tadını çıkarın.' : 'Enjoy an ad-free experience.') : (isTr ? 'Reklamları tamamen kaldırmak için PRO\'ya geçin.' : 'Upgrade to PRO to remove all ads.'), 
                             style: TextStyle(
                               color: isPro ? Colors.white70 : const Color(0xFF92400E).withOpacity(0.8), 
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500
-                            )
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.visible,
                           ),
                         ],
                       ),
                     ),
                     if (!isPro)
-                      Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
                         child: ElevatedButton(
                           onPressed: _showPremiumDialog,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: const Color(0xFFB45309),
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: Text(
                             isTr ? 'Geç' : 'Upgrade', 
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)
                           ),
                         ),
                       ),

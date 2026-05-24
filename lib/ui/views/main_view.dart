@@ -50,7 +50,12 @@ class _MainViewState extends ConsumerState<MainView> {
           ),
           SafeArea(
             child: Container(
-              margin: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+              margin: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 8,
+                bottom: MediaQuery.of(context).viewPadding.bottom > 0 ? 0 : 12,
+              ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
@@ -97,7 +102,7 @@ class _MainViewState extends ConsumerState<MainView> {
                       items: [
                         _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
                         _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
-                        _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'calendar.title'.tr(), 2),
+                        _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'history.title'.tr(), 2),
                         _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 3),
                       ],
                     ),

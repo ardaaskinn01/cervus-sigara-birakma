@@ -141,10 +141,7 @@ class _CalendarViewState extends ConsumerState<CalendarView> {
             style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFF064E3B)),
-          onPressed: () => Navigator.pop(context),
-        ),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Color(0xFF064E3B)),
