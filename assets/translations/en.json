@@ -58,6 +58,7 @@
     "reset_desc": "You confirm that you smoked. Your progress will be reset.",
     "reset_cancel": "CANCEL",
     "reset_confirm": "RESET",
+    "relapse_btn": "I SMOKED",
     "reset_success": "Timer reset. Never give up!"
   },
   "health": {
@@ -137,5 +138,8 @@
     "day": "DAY",
     "hour": "HOUR",
     "minute": "MINUTE"
+  },
+  "calendar": {
+    "title": "Calendar"
   }
 }

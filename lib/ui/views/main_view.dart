@@ -71,7 +71,7 @@ class _MainViewState extends ConsumerState<MainView> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
-                    height: 65,
+                    height: 72,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(32),
@@ -94,15 +94,17 @@ class _MainViewState extends ConsumerState<MainView> {
                       showSelectedLabels: true,
                       showUnselectedLabels: false,
                       type: BottomNavigationBarType.fixed,
+                      iconSize: 22,
                       selectedLabelStyle: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
+                        height: 1.2,
                         letterSpacing: 0.2,
                       ),
                       items: [
                         _buildNavItem(Icons.dashboard_rounded, Icons.dashboard_outlined, 'dashboard.title'.tr(), 0),
                         _buildNavItem(Icons.favorite_rounded, Icons.favorite_outline_rounded, 'health.title'.tr(), 1),
-                        _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'history.title'.tr(), 2),
+                        _buildNavItem(Icons.calendar_month_rounded, Icons.calendar_month_outlined, 'calendar.title'.tr() == 'calendar.title' ? (context.locale.languageCode == 'tr' ? 'Takvim' : 'Calendar') : 'calendar.title'.tr(), 2),
                         _buildNavItem(Icons.person_rounded, Icons.person_outline_rounded, 'profile.title'.tr(), 3),
                       ],
                     ),
@@ -121,7 +123,7 @@ class _MainViewState extends ConsumerState<MainView> {
     return BottomNavigationBarItem(
       icon: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF2E7D32).withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),

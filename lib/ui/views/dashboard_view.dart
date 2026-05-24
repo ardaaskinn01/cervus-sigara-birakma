@@ -100,75 +100,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CrisisView()),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF), // Light Blue 50
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFF93C5FD), width: 2), // Blue 300
-                            boxShadow: [
-                              BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.bolt_rounded, size: 32, color: Color(0xFF2563EB)), // Blue 600
-                              const SizedBox(height: 8),
-                              Text(
-                                'crisis.title'.tr(),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
-                                  color: Color(0xFF1E3A8A), // Blue 900
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: _buildActionButton(
+                        context: context,
+                        title: 'crisis.title'.tr(),
+                        icon: Icons.flash_on_rounded,
+                        color: const Color(0xFF06B6D4), // Canlı Turkuaz
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CrisisView())),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: GestureDetector(
+                      child: _buildActionButton(
+                        context: context,
+                        title: 'dashboard.relapse_btn'.tr(), // Anahtarı kontrol edin (relapse_btn veya reset_confirm)
+                        icon: Icons.rotate_left_rounded, // Daha modern bir "başa dön" ikonu
+                        color: const Color(0xFFF59E0B), // Dikkat çekici Amber
                         onTap: () => _showResetConfirmation(context, ref),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFFBEB), // Amber 50
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: const Color(0xFFFBBF24), width: 2), // Amber 400
-                            boxShadow: [
-                              BoxShadow(color: const Color(0xFFF59E0B).withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.refresh_rounded, size: 32, color: Color(0xFF4B5563)), // Gray 600
-                              const SizedBox(height: 8),
-                              Text(
-                                'dashboard.reset_confirm'.tr(),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
-                                  color: Colors.black, 
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -387,6 +334,62 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 110,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.18), color.withOpacity(0.06)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: color.withOpacity(0.4), width: 1.8),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.12),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(color: color.withOpacity(0.3), width: 1),
+              ),
+              child: Icon(icon, color: color, size: 30),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                color: color.withOpacity(0.9), // Biraz daha belirgin yaparak okunabilirliği artırıyoruz
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
         ),
       ),
     );

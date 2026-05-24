@@ -373,12 +373,6 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 child: Row(
                   children: [
                     Container(
-                      margin: EdgeInsets.only(
-                        left: 24, 
-                        right: 24, 
-                        top: 8, 
-                        bottom: Platform.isIOS ? 0 : 12
-                      ),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
@@ -395,18 +389,16 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
-                              style: TextStyle(
-                                color: isPro ? Colors.white : const Color(0xFF78350F), 
-                                fontWeight: FontWeight.w900,
-                                fontSize: 17,
-                                letterSpacing: -0.5
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : (isTr ? 'Quitly PRO\'ya Geç' : 'Upgrade to Quitly PRO'), 
+                            style: TextStyle(
+                              color: isPro ? Colors.white : const Color(0xFF78350F), 
+                              fontWeight: FontWeight.w900,
+                              fontSize: 17,
+                              letterSpacing: -0.5
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(

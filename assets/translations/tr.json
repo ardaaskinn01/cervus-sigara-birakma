@@ -58,6 +58,7 @@
     "reset_desc": "Sigara içtiğini onaylıyorsun. Sürecin baştan başlayacak.",
     "reset_cancel": "VAZGEÇ",
     "reset_confirm": "SİGARA İÇTİM",
+    "relapse_btn": "SİGARA İÇTİM",
     "reset_success": "Sayaç sıfırlandı. Asla pes etme!"
   },
   "health": {
@@ -137,5 +138,8 @@
     "day": "GÜN",
     "hour": "SAAT",
     "minute": "DAKİKA"
+  },
+  "calendar": {
+    "title": "Takvim"
   }
 }
