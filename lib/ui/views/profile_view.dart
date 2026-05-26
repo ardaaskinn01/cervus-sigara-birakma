@@ -128,8 +128,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 const SizedBox(height: 20),
                 
                 // Özellikler
-                _buildPremiumFeatureRow(Icons.block, isTr ? 'Reklamları Tamamen Kaldır' : 'Remove All Ads'),
-                const SizedBox(height: 24),
+                _buildPremiumFeatureRow(Icons.check_circle_rounded, isTr ? 'Reklamları Tamamen Kaldır' : 'Remove All Ads'),
+                _buildPremiumFeatureRow(Icons.star_rounded, isTr ? 'Sınırsız Kullanım' : 'Unlimited Access'),
+                const SizedBox(height: 12),
 
                 // RevenueCat paketler
                 FutureBuilder<Offerings?>(
@@ -142,36 +143,34 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                       return Text(isTr ? "Paketler yüklenemedi." : "Packages could not be loaded.", style: const TextStyle(color: Color(0xFF64748B)));
                     }
                     final packages = snapshot.data!.current?.availablePackages ?? [];
-                    final monthly  = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull 
-                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('monthly')).firstOrNull;
-                    final yearly   = packages.where((p) => p.packageType == PackageType.annual).firstOrNull 
-                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('year') || p.identifier.toLowerCase().contains('ann')).firstOrNull;
-                    final lifetime = packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull 
-                                     ?? packages.where((p) => p.identifier.toLowerCase().contains('life') || p.identifier.toLowerCase().contains('pro')).firstOrNull;
+                    final monthly  = packages.where((p) => p.packageType == PackageType.monthly).firstOrNull;
+                    final yearly   = packages.where((p) => p.packageType == PackageType.annual).firstOrNull;
+                    final lifetime = packages.where((p) => p.packageType == PackageType.lifetime).firstOrNull;
+                    
                     return Column(children: [
                       if (monthly  != null) 
                         _buildSubCard(
                           package: monthly,
-                          title: isTr ? "Aylık" : "Monthly",
+                          title: isTr ? "Aylık Abonelik" : "Monthly Subscription",
                           price: monthly.storeProduct.priceString,
-                          subtitle: isTr ? "1 Aylık Abonelik" : "1 Month Subscription",
+                          subtitle: isTr ? "1 Ay boyunca geçerlidir" : "Valid for 1 Month",
                           isPopular: false,
                           isTr: isTr,
                         ),
                       if (yearly   != null) 
                         _buildSubCard(
                           package: yearly,
-                          title: isTr ? "Yıllık" : "Yearly",
+                          title: isTr ? "Yıllık Abonelik" : "Annual Subscription",
                           price: yearly.storeProduct.priceString,
-                          subtitle: isTr ? "1 Yıllık Abonelik" : "1 Year Subscription",
+                          subtitle: isTr ? "1 Yıl boyunca geçerlidir" : "Valid for 1 Year",
                           isPopular: true,
-                          originalPrice: yearly.storeProduct.currencyCode == 'TRY' ? "599.99 ₺" : "\$35.99",
+                          originalPrice: yearly.storeProduct.currencyCode == 'TRY' ? "799.99 ₺" : "$49.99",
                           isTr: isTr,
                         ),
                       if (lifetime != null) 
                         _buildSubCard(
                           package: lifetime,
-                          title: isTr ? "Ömür Boyu" : "Lifetime",
+                          title: isTr ? "Ömür Boyu Erişim" : "Lifetime Access",
                           price: lifetime.storeProduct.priceString,
                           subtitle: isTr ? "Tek seferlik ödeme" : "One-time payment",
                           isPopular: false,
@@ -182,37 +181,44 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                   },
                 ),
 
-                const SizedBox(height: 12),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 4,
+                const SizedBox(height: 16),
+                // Apple Compliance Links
+                Column(
                   children: [
-                    TextButton(
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
-                      onPressed: () => launchUrl(Uri.parse(AppConstants.privacyPolicyUrl)),
-                      child: Text(isTr ? "Gizlilik Politikası" : "Privacy Policy", style: const TextStyle(color: Color(0xFF10B981), fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text(
+                      isTr ? "Abonelik bilgilendirmesi ve koşullar:" : "Subscription info and legal conditions:",
+                      style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600),
                     ),
-                    const Text("•", style: TextStyle(color: Color(0x4D64748B))),
-                    TextButton(
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
-                      onPressed: () => launchUrl(Uri.parse("https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")),
-                      child: Text(isTr ? "Kullanım Koşulları (EULA)" : "Terms of Use (EULA)", style: const TextStyle(color: Color(0xFF10B981), fontSize: 12, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildLegalLink(isTr ? "Gizlilik Politikası" : "Privacy Policy", AppConstants.privacyPolicyUrl),
+                        const Text("  •  ", style: TextStyle(color: Color(0xFFCBD5E1))),
+                        _buildLegalLink(isTr ? "Kullanım Koşulları (EULA)" : "Terms of Use (EULA)", "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                TextButton(
+                ElevatedButton(
                   onPressed: () async { 
                     Navigator.pop(ctx); 
                     await RevenueCatService.restorePurchases(context, ref); 
                   },
-                  child: Text(isTr ? 'Satın Alımları Geri Yükle' : 'Restore Purchases', style: const TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.w600)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF1F5F9),
+                    foregroundColor: const Color(0xFF475569),
+                    elevation: 0,
+                    minimumSize: const Size(double.infinity, 45),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(isTr ? 'Satın Alımları Geri Yükle' : 'Restore Purchases', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx), 
-                  child: Text(isTr ? 'İptal' : 'Cancel', style: TextStyle(color: const Color(0xFF64748B).withOpacity(0.6), fontWeight: FontWeight.w500))
+                  child: Text(isTr ? 'Kapat' : 'Close', style: const TextStyle(color: Color(0xFF94A3B8), fontWeight: FontWeight.w500))
                 ),
               ],
             ),
@@ -241,6 +247,21 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
             child: Text(text, style: const TextStyle(color: Color(0xFF064E3B), fontSize: 15, fontWeight: FontWeight.w600)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLegalLink(String title, String url) {
+    return GestureDetector(
+      onTap: () => launchUrl(Uri.parse(url)),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF10B981),
+          fontWeight: FontWeight.bold,
+          decoration: TextDecoration.underline,
+        ),
       ),
     );
   }
