@@ -164,7 +164,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           price: yearly.storeProduct.priceString,
                           subtitle: isTr ? "1 Yıl boyunca geçerlidir" : "Valid for 1 Year",
                           isPopular: true,
-                          originalPrice: yearly.storeProduct.currencyCode == 'TRY' ? "799.99 ₺" : "$49.99",
+                          originalPrice: yearly.storeProduct.currencyCode == 'TRY' ? "799.99 ₺" : "\$49.99",
                           isTr: isTr,
                         ),
                       if (lifetime != null) 
