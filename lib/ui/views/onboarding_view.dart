@@ -87,6 +87,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
 
       NotificationService().schedulePeriodicNotifications();
       NotificationService().updateTokenToDatabase();
+      db.logAppEntry();
 
       if (mounted) {
         Navigator.pushReplacement(

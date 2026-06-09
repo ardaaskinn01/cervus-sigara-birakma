@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../services/notification_service.dart';
-import '../../services/dashboard_service.dart';
 import '../../services/ad_service.dart';
 import '../../providers/database_provider.dart';
 import '../../firebase_options.dart';
 import '../app_colors.dart';
 import 'onboarding_view.dart';
 import 'main_view.dart';
-import '../widgets/privacy_policy_sheet.dart';
 import 'dart:async';
-import 'dart:io';
 
 /// ==========================================
 /// 🚀 ULTRA-SAFE SPLASH SCREEN (ZIRHLI MOD)
@@ -104,6 +100,10 @@ class _SplashViewState extends ConsumerState<SplashView> with SingleTickerProvid
     final bool isRegistered = db.isRegistered;
 
     if (!mounted) return;
+
+    if (isRegistered) {
+      db.logAppEntry();
+    }
 
     Navigator.pushReplacement(
       context,
