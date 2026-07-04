@@ -153,8 +153,11 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           package: monthly,
                           title: isTr ? "Aylık Abonelik" : "Monthly Subscription",
                           price: monthly.storeProduct.priceString,
-                          subtitle: isTr ? "1 Ay boyunca geçerlidir" : "Valid for 1 Month",
+                          subtitle: isTr 
+                              ? "1 hafta ücretsiz dene, sonra aylık ${monthly.storeProduct.priceString}" 
+                              : "Try 1 week free, then monthly ${monthly.storeProduct.priceString}",
                           isPopular: false,
+                          hasTrial: true,
                           isTr: isTr,
                         ),
                       if (yearly   != null) 
@@ -274,6 +277,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     required bool isPopular,
     String? originalPrice,
     bool isSpecialOffer = false,
+    bool hasTrial = false,
     required bool isTr,
   }) {
     return GestureDetector(
@@ -313,7 +317,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           decoration: BoxDecoration(color: Colors.orange.shade700, borderRadius: BorderRadius.circular(6)),
                           child: Text(isTr ? "ÖZEL TEKLİF" : "SPECIAL OFFER", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
                         ),
-                      ]
+                      ],
+                      if (hasTrial) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(6)),
+                          child: Text(isTr ? "1 HAFTA ÜCRETSİZ" : "1 WEEK FREE", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
