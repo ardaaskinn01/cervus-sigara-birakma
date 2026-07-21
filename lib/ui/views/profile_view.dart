@@ -119,13 +119,75 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.workspace_premium_rounded, size: 60, color: Color(0xFF10B981)),
-                const SizedBox(height: 12),
+                const Icon(Icons.workspace_premium_rounded, size: 56, color: Color(0xFF10B981)),
+                const SizedBox(height: 8),
                 Text(
                   isTr ? "Quitly Pro" : "Quitly Pro", 
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
+
+                // Vurgulu 1 Haftalık Ücretsiz Deneme Hero Banderolü
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.card_giftcard_rounded, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isTr ? "🎁 7 GÜN ÜCRETSİZ DENEME HAKKI" : "🎁 7-DAY FREE TRIAL INCLUDED",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isTr 
+                                  ? "Bugün ₺0.00 ödeyin! İlk 7 gün ücretsiz deneyin, dilediğiniz an iptal edin." 
+                                  : "Pay $0.00 today! Try free for 7 days, cancel anytime.",
+                              style: const TextStyle(
+                                color: Colors.white90,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 
                 // Özellikler
                 _buildPremiumFeatureRow(Icons.check_circle_rounded, isTr ? 'Reklamları Tamamen Kaldır' : 'Remove All Ads'),
@@ -154,8 +216,8 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           title: isTr ? "Aylık Abonelik" : "Monthly Subscription",
                           price: monthly.storeProduct.priceString,
                           subtitle: isTr 
-                              ? "1 hafta ücretsiz dene, sonra aylık ${monthly.storeProduct.priceString}" 
-                              : "Try 1 week free, then monthly ${monthly.storeProduct.priceString}",
+                              ? "7 gün ₺0.00, ardından ${monthly.storeProduct.priceString}/ay" 
+                              : "7 days $0.00, then ${monthly.storeProduct.priceString}/month",
                           isPopular: false,
                           hasTrial: true,
                           isTr: isTr,
@@ -289,8 +351,15 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isPopular ? const Color(0xFF10B981).withOpacity(0.1) : Colors.transparent,
-          border: Border.all(color: isPopular ? const Color(0xFF10B981) : Colors.grey.withOpacity(0.2)),
+          color: hasTrial 
+              ? const Color(0xFF2563EB).withOpacity(0.08) 
+              : (isPopular ? const Color(0xFF10B981).withOpacity(0.1) : Colors.transparent),
+          border: Border.all(
+            color: hasTrial 
+                ? const Color(0xFF2563EB) 
+                : (isPopular ? const Color(0xFF10B981) : Colors.grey.withOpacity(0.2)),
+            width: hasTrial || isPopular ? 1.8 : 1.0,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -301,16 +370,43 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                 children: [
                   Row(
                     children: [
-                      Text(title, style: const TextStyle(color: Color(0xFF064E3B), fontSize: 16, fontWeight: FontWeight.bold)),
-                      if (isPopular) ...[
+                      Flexible(
+                        child: Text(
+                          title, 
+                          style: const TextStyle(color: Color(0xFF064E3B), fontSize: 15, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (hasTrial) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2563EB).withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            isTr ? "⚡ 1 HAFTA ÜCRETSİZ" : "⚡ 1 WEEK FREE", 
+                            style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                      ] else if (isPopular) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(color: const Color(0xFF10B981), borderRadius: BorderRadius.circular(6)),
                           child: Text(isTr ? "POPÜLER" : "POPULAR", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
                         ),
-                      ],
-                      if (isSpecialOffer) ...[
+                      ] else if (isSpecialOffer) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -318,39 +414,43 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           child: Text(isTr ? "ÖZEL TEKLİF" : "SPECIAL OFFER", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
                         ),
                       ],
-                      if (hasTrial) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(6)),
-                          child: Text(isTr ? "1 HAFTA ÜCRETSİZ" : "1 WEEK FREE", style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
-                        ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                  Text(subtitle, style: TextStyle(color: hasTrial ? const Color(0xFF1E40AF) : const Color(0xFF64748B), fontSize: 12, fontWeight: hasTrial ? FontWeight.w600 : FontWeight.normal)),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (originalPrice != null)
+                if (hasTrial) ...[
                   Text(
-                    originalPrice,
-                    style: TextStyle(
-                      color: const Color(0xFF64748B).withOpacity(0.6),
-                      fontSize: 13,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: Colors.redAccent,
-                      decorationThickness: 2.0,
-                    ),
+                    isTr ? "₺0.00 / 7 Gün" : "$0.00 / 7 Days",
+                    style: const TextStyle(color: Color(0xFF2563EB), fontSize: 15, fontWeight: FontWeight.w900),
                   ),
-                Text(
-                  price,
-                  style: const TextStyle(color: Color(0xFF059669), fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                  Text(
+                    isTr ? "sonra $price/ay" : "then $price/mo",
+                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 11, fontWeight: FontWeight.w500),
+                  ),
+                ] else ...[
+                  if (originalPrice != null)
+                    Text(
+                      originalPrice,
+                      style: TextStyle(
+                        color: const Color(0xFF64748B).withOpacity(0.6),
+                        fontSize: 13,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: Colors.redAccent,
+                        decorationThickness: 2.0,
+                      ),
+                    ),
+                  Text(
+                    price,
+                    style: const TextStyle(color: Color(0xFF059669), fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ],
             ),
           ],
@@ -391,14 +491,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           end: Alignment.bottomRight,
                         )
                       : const LinearGradient(
-                          colors: [Color(0xFFFDE047), Color(0xFFF59E0B)],
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: (isPro ? const Color(0xFF0F172A) : const Color(0xFFF59E0B)).withOpacity(0.25),
+                      color: (isPro ? const Color(0xFF0F172A) : const Color(0xFF2563EB)).withOpacity(0.3),
                       blurRadius: 25,
                       offset: const Offset(0, 12),
                     ),
@@ -413,32 +513,52 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
-                        isPro ? Icons.auto_awesome_rounded : Icons.star_rounded, 
-                        color: isPro ? const Color(0xFFFDE047) : Colors.white, 
+                        isPro ? Icons.auto_awesome_rounded : Icons.card_giftcard_rounded, 
+                        color: Colors.white, 
                         size: 28
                       ),
                     ),
-                    const SizedBox(width: 18),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : 'Quitly PRO', 
-                            style: TextStyle(
-                              color: isPro ? Colors.white : const Color(0xFF78350F), 
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
-                              letterSpacing: -0.5
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              Text(
+                                isPro ? (isTr ? 'Quitly PRO Açık' : 'Quitly PRO Active') : 'Quitly PRO', 
+                                style: const TextStyle(
+                                  color: Colors.white, 
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 17,
+                                  letterSpacing: -0.5
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (!isPro) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    isTr ? "1 HAFTA ÜCRETSİZ" : "1 WEEK FREE",
+                                    style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 8, fontWeight: FontWeight.w900),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 3),
                           Text(
-                            isPro ? (isTr ? 'Reklamsız deneyimin tadını çıkarın.' : 'Enjoy an ad-free experience.') : (isTr ? 'Reklamları tamamen kaldırmak için PRO\'ya geçin.' : 'Upgrade to PRO to remove all ads.'), 
-                            style: TextStyle(
-                              color: isPro ? Colors.white70 : const Color(0xFF92400E).withOpacity(0.8), 
+                            isPro 
+                                ? (isTr ? 'Reklamsız deneyimin tadını çıkarın.' : 'Enjoy an ad-free experience.') 
+                                : (isTr ? '1 Hafta Ücretsiz Deneme fırsatıyla reklamları kaldırın.' : 'Remove all ads with a 1-Week Free Trial.'), 
+                            style: const TextStyle(
+                              color: Colors.white90, 
                               fontSize: 12,
                               fontWeight: FontWeight.w500
                             ),
@@ -455,14 +575,14 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           onPressed: _showPremiumDialog,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFFB45309),
+                            foregroundColor: const Color(0xFF1D4ED8),
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: Text(
-                            isTr ? 'Geç' : 'Upgrade', 
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)
+                            isTr ? '7 Gün Ücretsiz' : '7 Days Free', 
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11)
                           ),
                         ),
                       ),
