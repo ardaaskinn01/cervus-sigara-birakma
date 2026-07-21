@@ -174,9 +174,9 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                             Text(
                               isTr 
                                   ? "Bugün ₺0.00 ödeyin! İlk 7 gün ücretsiz deneyin, dilediğiniz an iptal edin." 
-                                  : "Pay $0.00 today! Try free for 7 days, cancel anytime.",
+                                  : "Pay \$0.00 today! Try free for 7 days, cancel anytime.",
                               style: const TextStyle(
-                                color: Colors.white90,
+                                color: Color(0xE6FFFFFF),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -217,7 +217,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                           price: monthly.storeProduct.priceString,
                           subtitle: isTr 
                               ? "7 gün ₺0.00, ardından ${monthly.storeProduct.priceString}/ay" 
-                              : "7 days $0.00, then ${monthly.storeProduct.priceString}/month",
+                              : "7 days \$0.00, then ${monthly.storeProduct.priceString}/month",
                           isPopular: false,
                           hasTrial: true,
                           isTr: isTr,
@@ -427,7 +427,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               children: [
                 if (hasTrial) ...[
                   Text(
-                    isTr ? "₺0.00 / 7 Gün" : "$0.00 / 7 Days",
+                    isTr ? "₺0.00 / 7 Gün" : "\$0.00 / 7 Days",
                     style: const TextStyle(color: Color(0xFF2563EB), fontSize: 15, fontWeight: FontWeight.w900),
                   ),
                   Text(
@@ -558,7 +558,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
                                 ? (isTr ? 'Reklamsız deneyimin tadını çıkarın.' : 'Enjoy an ad-free experience.') 
                                 : (isTr ? '1 Hafta Ücretsiz Deneme fırsatıyla reklamları kaldırın.' : 'Remove all ads with a 1-Week Free Trial.'), 
                             style: const TextStyle(
-                              color: Colors.white90, 
+                              color: Color(0xE6FFFFFF), 
                               fontSize: 12,
                               fontWeight: FontWeight.w500
                             ),
